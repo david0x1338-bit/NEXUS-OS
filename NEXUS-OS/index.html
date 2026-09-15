@@ -1,0 +1,5128 @@
+```html
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS OS</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    user-select:none;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+    background:#070b14;
+    color:white;
+}
+
+button,input,textarea{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+#desktop{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:linear-gradient(135deg,#10192e,#070b14 70%);
+}
+
+.desktopGlow{
+    position:absolute;
+    inset:-30%;
+    background:radial-gradient(
+        circle at 50% 35%,
+        rgba(45,120,255,.18),
+        transparent 45%
+    );
+    pointer-events:none;
+}
+
+.desktopIcons{
+    position:absolute;
+    top:25px;
+    left:25px;
+    display:flex;
+    gap:25px;
+    z-index:2;
+}
+
+.desktopIcon{
+    width:90px;
+    text-align:center;
+    padding:10px;
+    border-radius:12px;
+    background:transparent;
+    border:1px solid transparent;
+    color:white;
+}
+
+.desktopIcon:hover{
+    background:rgba(255,255,255,.1);
+    border-color:rgba(255,255,255,.12);
+}
+
+.desktopIconSymbol{
+    font-size:42px;
+}
+
+.desktopIconName{
+    margin-top:5px;
+    font-size:13px;
+}
+
+#effectsCanvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:none;
+    z-index:5;
+    pointer-events:none;
+}
+
+/* TASKBAR */
+
+#taskbar{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    height:62px;
+    background:rgba(10,15,27,.9);
+    backdrop-filter:blur(15px);
+    border-top:1px solid rgba(255,255,255,.12);
+    display:flex;
+    align-items:center;
+    padding:8px 12px;
+    z-index:1000;
+}
+
+#startButton{
+    width:46px;
+    height:46px;
+    border:0;
+    border-radius:12px;
+    background:#2864d7;
+    color:white;
+    font-size:22px;
+    font-weight:bold;
+}
+
+#taskbarApps{
+    display:flex;
+    gap:7px;
+    margin-left:10px;
+}
+
+.taskbarApp{
+    width:44px;
+    height:44px;
+    border:0;
+    border-radius:10px;
+    background:#182238;
+    color:white;
+    font-size:20px;
+}
+
+.taskbarApp:hover{
+    background:#26385d;
+}
+
+#taskbarClock{
+    margin-left:auto;
+    text-align:right;
+    font-size:12px;
+    line-height:1.35;
+    color:#dbe7ff;
+}
+
+/* START */
+
+#startMenu{
+    display:none;
+    position:fixed;
+    left:12px;
+    bottom:72px;
+    width:390px;
+    max-height:calc(100vh - 90px);
+    overflow:auto;
+    background:rgba(12,18,32,.97);
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:18px;
+    padding:18px;
+    z-index:1100;
+    box-shadow:0 20px 70px #0008;
+}
+
+.startTitle{
+    font-size:25px;
+    font-weight:800;
+    margin-bottom:12px;
+}
+
+.startSearch{
+    width:100%;
+    padding:11px;
+    border:1px solid #33425f;
+    background:#10182a;
+    color:white;
+    border-radius:10px;
+    outline:0;
+}
+
+.startApps{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:14px;
+}
+
+.startApps button,
+.shutdownVisual{
+    border:1px solid #293958;
+    background:#141e33;
+    color:white;
+    border-radius:10px;
+    padding:11px;
+    text-align:left;
+}
+
+.startApps button:hover,
+.shutdownVisual:hover{
+    background:#243657;
+}
+
+.shutdownVisual{
+    width:100%;
+    margin-top:14px;
+    color:#ffb9b9;
+}
+
+/* APP WINDOWS */
+
+.app{
+    display:none;
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    padding-bottom:62px;
+    flex-direction:column;
+    background:#0b1120;
+    z-index:100;
+}
+
+.appHeader{
+    height:58px;
+    min-height:58px;
+    display:flex;
+    align-items:center;
+    padding:0 18px;
+    background:linear-gradient(90deg,#111d35,#101725);
+    border-bottom:1px solid #263452;
+    font-weight:700;
+    font-size:17px;
+}
+
+.closeButton{
+    margin-left:auto;
+    border:0;
+    background:#9b293d;
+    color:white;
+    width:38px;
+    height:34px;
+    border-radius:8px;
+    font-size:17px;
+}
+
+.closeButton:hover{
+    background:#c2384f;
+}
+
+.app button:not(.closeButton){
+    border:1px solid #30405e;
+    background:#18243a;
+    color:white;
+    border-radius:8px;
+    padding:9px;
+}
+
+.app button:not(.closeButton):hover{
+    background:#263858;
+}
+
+/* PAINT */
+
+#paint{
+    background:#dfe5ec;
+}
+
+.paintToolbar{
+    display:flex;
+    gap:7px;
+    padding:9px;
+    background:#111827;
+}
+
+.paintToolbar button{
+    min-width:55px;
+}
+
+.paintCanvasWrap{
+    flex:1;
+    padding:12px;
+}
+
+.paintCanvas{
+    width:100%;
+    height:100%;
+    background:white;
+    border:2px solid #202a3d;
+    touch-action:none;
+}
+
+/* NOTEPAD */
+
+#notepadArea{
+    flex:1;
+    width:100%;
+    resize:none;
+    border:0;
+    outline:0;
+    background:#111827;
+    color:white;
+    padding:18px;
+    font:16px Consolas,monospace;
+}
+
+/* CLOCK */
+
+.clockBody{
+    flex:1;
+    overflow:auto;
+    padding:25px;
+    text-align:center;
+}
+
+.bigClock{
+    font-size:clamp(60px,10vw,140px);
+    font-weight:800;
+}
+
+.clockDate{
+    font-size:22px;
+    color:#a9bbdb;
+}
+
+.timerBox{
+    margin:25px auto;
+    max-width:480px;
+    background:#111a2c;
+    padding:20px;
+    border-radius:15px;
+}
+
+.timerBox input{
+    background:#0a1120;
+    color:white;
+    border:1px solid #33415e;
+    padding:10px;
+    border-radius:8px;
+}
+
+.timerDisplay{
+    font-size:45px;
+    margin:15px;
+}
+
+.alarmMessage{
+    display:none;
+    background:#b82c42;
+    padding:14px;
+    border-radius:10px;
+    margin:10px;
+}
+
+/* MINECRAFT */
+
+#minecraft{
+    background:#111;
+}
+
+.mcWrap{
+    position:relative;
+    flex:1;
+    overflow:hidden;
+}
+
+.mcCanvas{
+    width:100%;
+    height:100%;
+    display:block;
+}
+
+.mcHotbar{
+    position:absolute;
+    bottom:18px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:5px;
+    background:#0009;
+    padding:6px;
+    border-radius:9px;
+}
+
+.mcSlot{
+    width:42px;
+    height:42px;
+    border:2px solid #555;
+    background:#222;
+    color:white;
+    border-radius:4px;
+    font-size:20px;
+}
+
+.mcSlot.selected{
+    border-color:white;
+    box-shadow:0 0 0 2px #2864d7;
+}
+
+/* =========================================================
+   CMD — POPRAWIONE PRZEWIJANIE
+========================================================= */
+
+#cmd{
+    z-index:2000;
+}
+
+.cmdBody{
+    flex:1;
+    min-height:0;
+    background:#050805;
+    color:#53ff7a;
+    padding:18px;
+    font:15px Consolas,monospace;
+
+    display:flex;
+    flex-direction:column;
+}
+
+/* TYLKO TEN OBSZAR SIĘ PRZEWIJA */
+
+#cmdOutput{
+    flex:1;
+    min-height:0;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    white-space:pre-wrap;
+    word-break:break-word;
+
+    user-select:text;
+
+    padding-right:10px;
+}
+
+/* Pasek przewijania CMD */
+
+#cmdOutput::-webkit-scrollbar{
+    width:10px;
+}
+
+#cmdOutput::-webkit-scrollbar-track{
+    background:#071007;
+}
+
+#cmdOutput::-webkit-scrollbar-thumb{
+    background:#2cff5b;
+    border-radius:5px;
+}
+
+#cmdOutput::-webkit-scrollbar-thumb:hover{
+    background:#53ff7a;
+}
+
+/* Linia C:\NEXUS> zawsze zostaje na dole */
+
+.cmdInputLine{
+    flex-shrink:0;
+
+    display:flex;
+    align-items:center;
+
+    min-height:32px;
+
+    margin-top:10px;
+    padding-top:10px;
+
+    border-top:1px solid #17351d;
+}
+
+.cmdInputLine span{
+    white-space:nowrap;
+    user-select:none;
+}
+
+.cmdInputLine input{
+    flex:1;
+    min-width:0;
+
+    background:transparent;
+    border:0;
+    outline:0;
+
+    color:#53ff7a;
+    font:15px Consolas,monospace;
+
+    user-select:text;
+    cursor:text;
+}
+
+/* BROWSER */
+
+.browserToolbar{
+    display:flex;
+    gap:6px;
+    padding:8px;
+    background:#121b2d;
+}
+
+.browserToolbar input{
+    flex:1;
+    background:#0b1220;
+    color:white;
+    border:1px solid #33415d;
+    border-radius:8px;
+    padding:9px;
+}
+
+.browserHome{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.browserHero{
+    text-align:center;
+}
+
+.browserHero h1{
+    font-size:60px;
+    margin:0;
+}
+
+.browserHero p{
+    color:#9db0d3;
+}
+
+.browserSearch{
+    display:flex;
+    gap:8px;
+}
+
+.browserSearch input{
+    width:min(550px,70vw);
+    padding:13px;
+    background:#111a2c;
+    color:white;
+    border:1px solid #34445f;
+    border-radius:10px;
+}
+
+.browserFrame{
+    flex:1;
+    width:100%;
+    border:0;
+    background:white;
+}
+
+/* CALCULATOR */
+
+.calcBody{
+    width:min(430px,100%);
+    margin:auto;
+    padding:25px;
+}
+
+.calcBody input{
+    width:100%;
+    font-size:30px;
+    padding:15px;
+    text-align:right;
+    background:#070d18;
+    color:white;
+    border:1px solid #31415e;
+    border-radius:10px;
+}
+
+.calcGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-top:10px;
+}
+
+.calcGrid button{
+    height:60px;
+    font-size:20px;
+}
+
+.calcEqual{
+    background:#2864d7!important;
+}
+
+/* FILES / GALLERY */
+
+.fileBody,
+.galleryBody,
+.musicBody,
+.settingsBody,
+.gameBody,
+.effectsBody{
+    flex:1;
+    overflow:auto;
+    padding:25px;
+}
+
+.fileGrid,
+.galleryGrid,
+.gameMenu,
+.effectsGrid,
+.settingsBody{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+    gap:15px;
+}
+
+.fileCard,
+.galleryCard,
+.gameCard,
+.effectCard,
+.settingsCard{
+    background:#111a2c;
+    border:1px solid #283854;
+    border-radius:14px;
+    padding:22px;
+}
+
+.fileCard{
+    text-align:center;
+    font-size:18px;
+}
+
+.galleryCard{
+    height:150px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:60px;
+}
+
+/* MUSIC */
+
+.musicBody{
+    text-align:center;
+}
+
+.musicDisc{
+    font-size:110px;
+    margin:30px auto;
+}
+
+.musicDisc.playing{
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+/* AI */
+
+#aiBody{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    padding:18px;
+    max-width:1000px;
+    width:100%;
+    margin:auto;
+}
+
+.aiOrb{
+    text-align:center;
+    font-size:65px;
+}
+
+.aiKeyRow{
+    display:flex;
+    gap:8px;
+    margin:10px 0;
+}
+
+.aiKeyRow input{
+    flex:1;
+    background:#0d1525;
+    color:white;
+    border:1px solid #33425f;
+    border-radius:8px;
+    padding:11px;
+}
+
+.aiStatus{
+    text-align:center;
+    color:#72a8ff;
+    margin:5px;
+}
+
+#aiMessages{
+    flex:1;
+    overflow:auto;
+    padding:15px;
+    background:#080e1a;
+    border-radius:12px;
+    border:1px solid #202d45;
+}
+
+.aiMessage{
+    padding:10px 13px;
+    margin:8px 0;
+    border-radius:12px;
+    max-width:80%;
+    white-space:pre-wrap;
+    line-height:1.45;
+}
+
+.aiBot{
+    background:#17243a;
+    margin-right:auto;
+}
+
+.aiUser{
+    background:#2864d7;
+    margin-left:auto;
+}
+
+.aiControls{
+    display:flex;
+    gap:7px;
+    margin-top:10px;
+}
+
+.aiControls input{
+    flex:1;
+    background:#111a2c;
+    color:white;
+    border:1px solid #33415e;
+    border-radius:9px;
+    padding:11px;
+}
+
+.aiSmall{
+    display:flex;
+    gap:7px;
+    margin-top:8px;
+}
+
+/* MONITOR */
+
+#monitorBody,
+#securityBody{
+    padding:20px;
+    overflow:auto;
+}
+
+.monitorGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.monitorCard,
+.securityTest{
+    background:#111a2c;
+    border:1px solid #293957;
+    border-radius:12px;
+    padding:15px;
+}
+
+.monitorTitle{
+    color:#9db0d3;
+}
+
+.monitorValue{
+    font-size:30px;
+    margin:8px 0;
+}
+
+.monitorBar{
+    height:7px;
+    background:#26334a;
+    border-radius:5px;
+    overflow:hidden;
+}
+
+.monitorFill{
+    height:100%;
+    background:#2864d7;
+}
+
+.monitorGraph{
+    width:100%;
+    height:250px;
+    background:#08101d;
+    margin-top:15px;
+    border-radius:12px;
+}
+
+/* SECURITY */
+
+.securityTop{
+    text-align:center;
+}
+
+.securityShield{
+    font-size:75px;
+}
+
+.securityTests{
+    display:grid;
+    gap:9px;
+    max-width:700px;
+    margin:20px auto;
+}
+
+.securityTest{
+    display:flex;
+    justify-content:space-between;
+}
+
+.securityPending{
+    color:#f0bd55;
+}
+
+.securityGood{
+    color:#45db78;
+}
+
+.securityButton{
+    display:block;
+    margin:auto;
+}
+
+/* GAME */
+
+.reactionGame{
+    display:none;
+    text-align:center;
+    padding:40px;
+}
+
+.reactionButton{
+    font-size:25px!important;
+    padding:25px 55px!important;
+}
+
+/* MAP */
+
+.mapBody{
+    position:relative;
+    padding:0;
+    overflow:hidden;
+}
+
+.mapCanvas{
+    width:100%;
+    height:100%;
+    display:block;
+    cursor:grab;
+}
+
+.mapInfo{
+    position:absolute;
+    top:15px;
+    left:15px;
+    background:#07101ddd;
+    padding:15px;
+    border-radius:10px;
+}
+
+/* WEATHER */
+
+#weather{
+    background:
+        radial-gradient(
+            circle at 50% 20%,
+            #1c4775,
+            #07101e 70%
+        );
+}
+
+.weatherBody{
+    flex:1;
+    overflow:auto;
+    padding:35px;
+    width:min(900px,100%);
+    margin:auto;
+}
+
+.weatherTop{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:20px;
+    padding:25px;
+}
+
+.weatherTop h1{
+    margin:0;
+    font-size:38px;
+}
+
+.weatherTop p{
+    color:#b9cbea;
+    margin:8px 0 0;
+    font-size:18px;
+}
+
+.weatherIcon{
+    font-size:85px;
+}
+
+.weatherTemperature{
+    text-align:center;
+    font-size:90px;
+    font-weight:800;
+    margin:25px 0;
+    text-shadow:0 0 30px rgba(80,170,255,.4);
+}
+
+.weatherGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.weatherCard{
+    background:#111d31;
+    border:1px solid #293b5c;
+    border-radius:15px;
+    padding:18px;
+    text-align:center;
+    font-size:30px;
+}
+
+.weatherCard span{
+    display:block;
+    color:#9db0d3;
+    font-size:14px;
+    margin:8px 0;
+}
+
+.weatherCard strong{
+    display:block;
+    font-size:20px;
+}
+
+.weatherControls{
+    display:flex;
+    gap:8px;
+    margin-top:20px;
+}
+
+.weatherControls input{
+    flex:1;
+    min-width:0;
+    padding:12px;
+    border-radius:9px;
+    border:1px solid #33425f;
+    background:#0c1423;
+    color:white;
+    outline:none;
+}
+
+.weatherControls button{
+    padding:12px 16px!important;
+}
+
+.weatherStatus{
+    text-align:center;
+    color:#79d8a0;
+    margin-top:15px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:700px){
+
+    .monitorGrid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    #startMenu{
+        width:calc(100vw - 24px);
+    }
+
+    .aiMessage{
+        max-width:95%;
+    }
+
+    .weatherGrid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .weatherTemperature{
+        font-size:65px;
+    }
+
+    .weatherControls{
+        flex-direction:column;
+    }
+
+    .weatherTop h1{
+        font-size:28px;
+    }
+
+    .weatherIcon{
+        font-size:60px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="desktop">
+
+<div class="desktopGlow"></div>
+
+<div class="desktopIcons">
+
+<button class="desktopIcon" id="clockIcon">
+<div class="desktopIconSymbol">🕐</div>
+<div class="desktopIconName">Zegar</div>
+</button>
+
+<button class="desktopIcon" id="minecraftIcon">
+<div class="desktopIconSymbol">⛏️</div>
+<div class="desktopIconName">Minecraft 2D</div>
+</button>
+
+<button class="desktopIcon" id="notepadIcon">
+<div class="desktopIconSymbol">📝</div>
+<div class="desktopIconName">Notatnik</div>
+</button>
+
+</div>
+
+<canvas id="effectsCanvas"></canvas>
+
+<!-- PAINT -->
+
+<div id="paint" class="app">
+
+<div class="appHeader">
+🎨 Paint
+<button class="closeButton" id="closePaint">✕</button>
+</div>
+
+<div class="paintToolbar">
+<button id="paintBlack">Czarny</button>
+<button id="paintRed">Czerwony</button>
+<button id="paintBlue">Niebieski</button>
+<button id="paintGreen">Zielony</button>
+<button id="paintErase">Gumka</button>
+<button id="paintClear">Wyczyść</button>
+</div>
+
+<div class="paintCanvasWrap">
+<canvas id="paintCanvas" class="paintCanvas"></canvas>
+</div>
+
+</div>
+
+<!-- NOTEPAD -->
+
+<div id="notepad" class="app">
+
+<div class="appHeader">
+📝 Notatnik
+<button class="closeButton" id="closeNotepad">✕</button>
+</div>
+
+<textarea id="notepadArea" spellcheck="false"></textarea>
+
+</div>
+
+<!-- CLOCK -->
+
+<div id="clockWindow" class="app">
+
+<div class="appHeader">
+🕐 Zegar
+<button class="closeButton" id="closeClock">✕</button>
+</div>
+
+<div class="clockBody">
+
+<div class="bigClock" id="bigClock">
+00:00:00
+</div>
+
+<div class="clockDate" id="clockDate"></div>
+
+<div class="timerBox">
+
+<h2>⏱️ Timer</h2>
+
+<input
+id="timerInput"
+type="time"
+step="1"
+value="00:00"
+>
+
+<div class="timerDisplay" id="timerDisplay">
+00:00
+</div>
+
+<button id="startTimer">▶ Start</button>
+<button id="stopTimer">■ Stop</button>
+
+<div class="alarmMessage" id="alarmMessage">
+⏰ ALARM! Kliknij, aby zatrzymać.
+</div>
+
+</div>
+
+</div>
+</div>
+
+<!-- MINECRAFT -->
+
+<div id="minecraft" class="app">
+
+<div class="appHeader">
+⛏️ Minecraft 2D
+<button class="closeButton" id="closeMinecraft">✕</button>
+</div>
+
+<div class="mcWrap">
+
+<canvas id="mcCanvas" class="mcCanvas"></canvas>
+
+<div class="mcHotbar">
+
+<button class="mcSlot selected" data-slot="0">🌿</button>
+<button class="mcSlot" data-slot="1">🟫</button>
+<button class="mcSlot" data-slot="2">🪨</button>
+<button class="mcSlot" data-slot="3">🪵</button>
+<button class="mcSlot" data-slot="4">🟨</button>
+<button class="mcSlot" data-slot="5">🟥</button>
+<button class="mcSlot" data-slot="6">🌱</button>
+<button class="mcSlot" data-slot="7">⬛</button>
+
+</div>
+</div>
+</div>
+
+<!-- CMD -->
+
+<div id="cmd" class="app">
+
+<div class="appHeader">
+💻 NEXUS CMD
+<button class="closeButton" id="closeCmd">✕</button>
+</div>
+
+<div class="cmdBody">
+
+<div id="cmdOutput">
+NEXUS OS [Version 1.0]
+Wpisz "help", aby zobaczyć dostępne komendy.
+</div>
+
+<div class="cmdInputLine">
+
+<span>
+C:\NEXUS&gt;&nbsp;
+</span>
+
+<input
+id="cmdInput"
+autocomplete="off"
+spellcheck="false"
+>
+
+</div>
+
+</div>
+</div>
+
+<!-- BROWSER -->
+
+<div id="browser" class="app">
+
+<div class="appHeader">
+🌐 NEXUS Browser
+<button class="closeButton" id="closeBrowser">✕</button>
+</div>
+
+<div class="browserToolbar">
+
+<button id="browserBack">←</button>
+<button id="browserForward">→</button>
+<button id="browserReload">⟳</button>
+<button id="browserHomeButton">🏠</button>
+
+<input
+id="browserAddress"
+placeholder="Wpisz adres lub wyszukaj..."
+>
+
+<button id="browserGo">Go</button>
+
+</div>
+
+<div id="browserHome" class="browserHome">
+
+<div class="browserHero">
+
+<h1>🌐 NEXUS</h1>
+
+<p>Twoja przeglądarka w NEXUS OS</p>
+
+<div class="browserSearch">
+
+<input
+id="browserHomeInput"
+placeholder="Szukaj w Google..."
+>
+
+<button id="browserSearchButton">
+Szukaj
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<iframe
+id="browserFrame"
+class="browserFrame"
+style="display:none"
+></iframe>
+
+</div>
+
+<!-- CALCULATOR -->
+
+<div id="calculator" class="app">
+
+<div class="appHeader">
+🧮 Kalkulator
+<button class="closeButton" id="closeCalculator">✕</button>
+</div>
+
+<div class="calcBody">
+
+<input
+id="calcDisplay"
+readonly
+value="0"
+>
+
+<div class="calcGrid">
+
+<button data-calc="clear">C</button>
+<button data-calc="(">(</button>
+<button data-calc=")">)</button>
+<button data-calc="/">÷</button>
+
+<button data-calc="7">7</button>
+<button data-calc="8">8</button>
+<button data-calc="9">9</button>
+<button data-calc="*">×</button>
+
+<button data-calc="4">4</button>
+<button data-calc="5">5</button>
+<button data-calc="6">6</button>
+<button data-calc="-">−</button>
+
+<button data-calc="1">1</button>
+<button data-calc="2">2</button>
+<button data-calc="3">3</button>
+<button data-calc="+">+</button>
+
+<button data-calc="0">0</button>
+<button data-calc=".">.</button>
+<button data-calc="back">⌫</button>
+<button data-calc="=" class="calcEqual">=</button>
+
+</div>
+</div>
+</div>
+
+<!-- FILE MANAGER -->
+
+<div id="fileManager" class="app">
+
+<div class="appHeader">
+📁 Menedżer plików
+<button class="closeButton" id="closeFiles">✕</button>
+</div>
+
+<div class="fileBody">
+
+<h2>📁 Ten komputer</h2>
+
+<div class="fileGrid">
+
+<div class="fileCard">💽<br><br>Dysk C:</div>
+<div class="fileCard">📂<br><br>Dokumenty</div>
+<div class="fileCard">🖼️<br><br>Obrazy</div>
+<div class="fileCard">🎵<br><br>Muzyka</div>
+<div class="fileCard">🎮<br><br>Gry</div>
+<div class="fileCard">⚙️<br><br>System</div>
+
+</div>
+
+</div>
+</div>
+
+<!-- GALLERY -->
+
+<div id="gallery" class="app">
+
+<div class="appHeader">
+🖼️ Galeria
+<button class="closeButton" id="closeGallery">✕</button>
+</div>
+
+<div class="galleryBody">
+
+<div class="galleryGrid">
+
+<div class="galleryCard">🌄</div>
+<div class="galleryCard">🌌</div>
+<div class="galleryCard">🏙️</div>
+<div class="galleryCard">🌲</div>
+<div class="galleryCard">🌋</div>
+<div class="galleryCard">🌊</div>
+
+</div>
+
+</div>
+</div>
+
+<!-- MUSIC -->
+
+<div id="music" class="app">
+
+<div class="appHeader">
+🎵 Muzyka
+<button class="closeButton" id="closeMusic">✕</button>
+</div>
+
+<div class="musicBody">
+
+<div class="musicDisc" id="musicDisc">
+🎵
+</div>
+
+<h2>NEXUS Radio</h2>
+
+<div>System Music Player</div>
+
+<br>
+
+<button id="musicPlay">
+▶ Odtwarzaj
+</button>
+
+</div>
+</div>
+
+<!-- SETTINGS -->
+
+<div id="settings" class="app">
+
+<div class="appHeader">
+⚙️ Ustawienia
+<button class="closeButton" id="closeSettings">✕</button>
+</div>
+
+<div class="settingsBody">
+
+<div class="settingsCard">
+
+<h2>⚙️ Personalizacja</h2>
+
+<button id="themeDark">🌑 Ciemny</button>
+<button id="themeBlue">🔵 Niebieski</button>
+<button id="themeGreen">🟢 Zielony</button>
+<button id="themePurple">🟣 Fioletowy</button>
+
+</div>
+
+<div class="settingsCard">
+
+<h2>ℹ️ O NEXUS OS</h2>
+
+<p>NEXUS OS 1.0</p>
+<p>Browser-based operating system</p>
+
+</div>
+
+</div>
+</div>
+
+<!-- AI -->
+
+<div id="nexusAI" class="app">
+
+<div class="appHeader">
+🧠 NEXUS AI
+<button class="closeButton" id="closeAI">✕</button>
+</div>
+
+<div id="aiBody">
+
+<div class="aiOrb">
+🧠
+</div>
+
+<div class="aiKeyRow">
+
+<input
+id="aiKey"
+type="password"
+placeholder="Wklej Groq API Key"
+>
+
+<button id="aiStart">
+START AI
+</button>
+
+</div>
+
+<div class="aiStatus" id="aiStatus">
+● AI wyłączony
+</div>
+
+<div id="aiMessages">
+
+<div class="aiMessage aiBot">
+Witaj! 👋
+
+Wpisz Groq API Key i kliknij
+START AI.
+
+Potem możesz normalnie ze mną rozmawiać.
+</div>
+
+</div>
+
+<div class="aiControls">
+
+<input
+id="aiInput"
+placeholder="Napisz wiadomość..."
+autocomplete="off"
+>
+
+<button id="aiSend">
+Wyślij
+</button>
+
+</div>
+
+<div class="aiSmall">
+
+<button id="aiClear">
+🧹 Wyczyść czat
+</button>
+
+<button id="aiLogout">
+🔒 Wyloguj AI
+</button>
+
+</div>
+
+</div>
+</div>
+
+<!-- MONITOR -->
+
+<div id="systemMonitor" class="app">
+
+<div class="appHeader">
+📊 Monitor systemu
+<button class="closeButton" id="closeMonitor">✕</button>
+</div>
+
+<div id="monitorBody">
+
+<div class="monitorGrid">
+
+<div class="monitorCard">
+<div class="monitorTitle">CPU</div>
+<div class="monitorValue" id="cpuValue">32%</div>
+<div class="monitorBar">
+<div class="monitorFill" id="cpuFill"></div>
+</div>
+</div>
+
+<div class="monitorCard">
+<div class="monitorTitle">RAM</div>
+<div class="monitorValue" id="ramValue">48%</div>
+<div class="monitorBar">
+<div class="monitorFill" id="ramFill"></div>
+</div>
+</div>
+
+<div class="monitorCard">
+<div class="monitorTitle">FPS</div>
+<div class="monitorValue" id="fpsValue">60</div>
+</div>
+
+<div class="monitorCard">
+<div class="monitorTitle">Temperatura</div>
+<div class="monitorValue" id="tempValue">42°C</div>
+</div>
+
+</div>
+
+<canvas id="monitorGraph" class="monitorGraph"></canvas>
+
+<p>
+● Wszystkie systemy NEXUS OS działają prawidłowo.
+</p>
+
+</div>
+</div>
+
+<!-- SECURITY -->
+
+<div id="securityCenter" class="app">
+
+<div class="appHeader">
+🔐 Security Center
+<button class="closeButton" id="closeSecurity">✕</button>
+</div>
+
+<div id="securityBody">
+
+<div class="securityTop">
+
+<div class="securityShield">
+🛡️
+</div>
+
+<div id="securityStatus">
+SYSTEM BEZPIECZNY
+</div>
+
+<p>
+Demonstracyjny skaner bezpieczeństwa NEXUS OS.
+</p>
+
+</div>
+
+<div class="securityTests">
+
+<div class="securityTest" id="securityFirewall">
+<div>🧱 Firewall</div>
+<span class="securityPending">Oczekuje</span>
+</div>
+
+<div class="securityTest" id="securityKernel">
+<div>⚙️ Kernel</div>
+<span class="securityPending">Oczekuje</span>
+</div>
+
+<div class="securityTest" id="securityNetwork">
+<div>🌐 Network</div>
+<span class="securityPending">Oczekuje</span>
+</div>
+
+<div class="securityTest" id="securityStorage">
+<div>💾 Storage</div>
+<span class="securityPending">Oczekuje</span>
+</div>
+
+<div class="securityTest" id="securityApps">
+<div>📦 Applications</div>
+<span class="securityPending">Oczekuje</span>
+</div>
+
+</div>
+
+<button class="securityButton" id="securityScan">
+🔍 Rozpocznij skanowanie
+</button>
+
+</div>
+</div>
+
+<!-- GAMES -->
+
+<div id="gameCenter" class="app">
+
+<div class="appHeader">
+🎮 NEXUS Game Center
+<button class="closeButton" id="closeGames">✕</button>
+</div>
+
+<div class="gameBody">
+
+<div id="gameMenu" class="gameMenu">
+
+<div class="gameCard" id="reactionCard">
+<div class="gameIcon">⚡</div>
+<h2>Reaction Test</h2>
+<p>Sprawdź swój refleks.</p>
+</div>
+
+<div class="gameCard">
+<div class="gameIcon">🖱️</div>
+<h2>Clicker</h2>
+<p>Klikaj jak najszybciej.</p>
+</div>
+
+<div class="gameCard">
+<div class="gameIcon">🔢</div>
+<h2>Number Challenge</h2>
+<p>Zapamiętaj liczbę.</p>
+</div>
+
+</div>
+
+<div id="reactionGame" class="reactionGame">
+
+<h2 id="reactionTitle">
+Przygotuj się...
+</h2>
+
+<button id="reactionButton">
+CZEKAJ...
+</button>
+
+<h2 id="reactionResult"></h2>
+
+</div>
+
+</div>
+</div>
+
+<!-- EFFECTS -->
+
+<div id="effects" class="app">
+
+<div class="appHeader">
+✨ NEXUS Effects
+<button class="closeButton" id="closeEffects">✕</button>
+</div>
+
+<div class="effectsBody">
+
+<div class="effectsGrid">
+
+<div class="effectCard">
+<h2>❄️ Śnieg</h2>
+<button id="snowEffect">Włącz / wyłącz</button>
+</div>
+
+<div class="effectCard">
+<h2>🌧️ Deszcz</h2>
+<button id="rainEffect">Włącz / wyłącz</button>
+</div>
+
+<div class="effectCard">
+<h2>🟢 Matrix</h2>
+<button id="matrixEffect">Włącz / wyłącz</button>
+</div>
+
+<div class="effectCard">
+<h2>🌌 Gwiazdy</h2>
+<button id="starsEffect">Włącz / wyłącz</button>
+</div>
+
+<div class="effectCard">
+<h2>🌙 Tryb nocny</h2>
+<button id="nightEffect">Włącz / wyłącz</button>
+</div>
+
+<div class="effectCard">
+<h2>🧹 Reset</h2>
+<button id="resetEffects">Reset efektów</button>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<!-- MAPS -->
+
+<div id="nexusMaps" class="app">
+
+<div class="appHeader">
+🗺️ NEXUS Maps
+<button class="closeButton" id="closeMaps">✕</button>
+</div>
+
+<div class="mapBody">
+
+<canvas id="mapCanvas" class="mapCanvas"></canvas>
+
+<div class="mapInfo">
+🗺️ NEXUS CITY
+<br><br>
+🏫 Szkoła
+<br>
+🏠 Centrum
+<br>
+⛏️ Kopalnia
+<br>
+🌲 Las
+<br><br>
+Przeciągaj mapę.
+<br>
+Scroll = zoom.
+</div>
+
+</div>
+</div>
+
+<!-- WEATHER -->
+
+<div id="weather" class="app">
+
+<div class="appHeader">
+🌤️ NEXUS Pogoda
+<button class="closeButton" id="closeWeather">✕</button>
+</div>
+
+<div class="weatherBody">
+
+<div class="weatherTop">
+
+<div>
+<h1 id="weatherCity">Wrocław</h1>
+
+<p id="weatherDescription">
+Ładowanie pogody...
+</p>
+</div>
+
+<div class="weatherIcon" id="weatherIcon">
+🌤️
+</div>
+
+</div>
+
+<div
+class="weatherTemperature"
+id="weatherTemperature"
+>
+--°C
+</div>
+
+<div class="weatherGrid">
+
+<div class="weatherCard">
+🌡️
+<span>Odczuwalna</span>
+<strong id="weatherFeels">--°C</strong>
+</div>
+
+<div class="weatherCard">
+💨
+<span>Wiatr</span>
+<strong id="weatherWind">-- km/h</strong>
+</div>
+
+<div class="weatherCard">
+🌧️
+<span>Opady</span>
+<strong id="weatherRain">-- mm</strong>
+</div>
+
+<div class="weatherCard">
+🕐
+<span>Aktualizacja</span>
+<strong id="weatherTime">--:--</strong>
+</div>
+
+</div>
+
+<div class="weatherControls">
+
+<input
+id="weatherCityInput"
+placeholder="Wpisz miasto..."
+value="Wrocław"
+>
+
+<button id="weatherSearch">
+🔎 Sprawdź
+</button>
+
+<button id="weatherRefresh">
+🔄 Odśwież
+</button>
+
+</div>
+
+<div
+id="weatherStatus"
+class="weatherStatus"
+>
+🟢 Połączono z serwerem NEXUS
+</div>
+
+</div>
+</div>
+
+<!-- TASKBAR -->
+
+<div id="taskbar">
+
+<button id="startButton">
+N
+</button>
+
+<div id="taskbarApps">
+
+<button class="taskbarApp" data-app="nexusAI">
+🧠
+</button>
+
+<button class="taskbarApp" data-app="systemMonitor">
+📊
+</button>
+
+<button class="taskbarApp" data-app="securityCenter">
+🔐
+</button>
+
+</div>
+
+<div id="taskbarClock">
+00:00
+<br>
+NEXUS OS
+</div>
+
+</div>
+
+<!-- START MENU -->
+
+<div id="startMenu">
+
+<div class="startTitle">
+NEXUS OS
+</div>
+
+<input
+class="startSearch"
+id="startSearch"
+placeholder="🔎 Szukaj aplikacji..."
+>
+
+<div class="startApps">
+
+<button id="startPaint">🎨 Paint</button>
+<button id="startNotepad">📝 Notatnik</button>
+<button id="startClock">🕐 Zegar</button>
+<button id="startMinecraft">⛏️ Minecraft 2D</button>
+<button id="startCmd">💻 CMD</button>
+<button id="startBrowser">🌐 NEXUS Browser</button>
+<button id="startCalculator">🧮 Kalkulator</button>
+<button id="startFiles">📁 Menedżer plików</button>
+<button id="startGallery">🖼️ Galeria</button>
+<button id="startMusic">🎵 Muzyka</button>
+<button id="startSettings">⚙️ Ustawienia</button>
+<button id="startAI">🧠 NEXUS AI</button>
+<button id="startMonitor">📊 Monitor systemu</button>
+<button id="startSecurity">🔐 Security Center</button>
+<button id="startGames">🎮 Game Center</button>
+<button id="startEffects">✨ NEXUS Effects</button>
+<button id="startMaps">🗺️ NEXUS Maps</button>
+<button id="startWeather">🌤️ Pogoda</button>
+
+</div>
+
+<button class="shutdownVisual" id="shutdownVisual">
+⏻ Wyłącz komputer
+</button>
+
+</div>
+
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   APLIKACJE
+========================================================= */
+
+const apps = {
+    paint: document.getElementById("paint"),
+    notepad: document.getElementById("notepad"),
+    clockWindow: document.getElementById("clockWindow"),
+    minecraft: document.getElementById("minecraft"),
+    cmd: document.getElementById("cmd"),
+    browser: document.getElementById("browser"),
+    calculator: document.getElementById("calculator"),
+    fileManager: document.getElementById("fileManager"),
+    gallery: document.getElementById("gallery"),
+    music: document.getElementById("music"),
+    settings: document.getElementById("settings"),
+    nexusAI: document.getElementById("nexusAI"),
+    systemMonitor: document.getElementById("systemMonitor"),
+    securityCenter: document.getElementById("securityCenter"),
+    gameCenter: document.getElementById("gameCenter"),
+    effects: document.getElementById("effects"),
+    nexusMaps: document.getElementById("nexusMaps"),
+    weather: document.getElementById("weather")
+};
+
+function closeAllApps(){
+    Object.values(apps).forEach(app=>{
+        if(app) app.style.display="none";
+    });
+}
+
+function openApp(id){
+
+    closeAllApps();
+
+    if(apps[id]){
+        apps[id].style.display="flex";
+    }
+
+    document.getElementById("startMenu").style.display="none";
+
+    if(id==="paint"){
+        setTimeout(resizePaint,50);
+    }
+
+    if(id==="systemMonitor"){
+        setTimeout(drawMonitorGraph,50);
+    }
+
+    if(id==="nexusMaps"){
+        setTimeout(resizeMap,50);
+    }
+
+    if(id==="minecraft"){
+        setTimeout(resizeMinecraftCanvas,50);
+    }
+
+    if(id==="weather"){
+        setTimeout(()=>{
+            loadWeather(
+                weatherCityInput.value.trim() || "wroclaw"
+            );
+        },50);
+    }
+
+    if(id==="cmd"){
+        setTimeout(()=>{
+            cmdInput.focus();
+        },50);
+    }
+}
+
+/* =========================================================
+   ZAMYKANIE
+========================================================= */
+
+const closeMap = {
+    closePaint:"paint",
+    closeNotepad:"notepad",
+    closeClock:"clockWindow",
+    closeMinecraft:"minecraft",
+    closeCmd:"cmd",
+    closeBrowser:"browser",
+    closeCalculator:"calculator",
+    closeFiles:"fileManager",
+    closeGallery:"gallery",
+    closeMusic:"music",
+    closeSettings:"settings",
+    closeAI:"nexusAI",
+    closeMonitor:"systemMonitor",
+    closeSecurity:"securityCenter",
+    closeGames:"gameCenter",
+    closeEffects:"effects",
+    closeMaps:"nexusMaps",
+    closeWeather:"weather"
+};
+
+Object.entries(closeMap).forEach(([button,app])=>{
+    const element=document.getElementById(button);
+
+    if(element){
+        element.addEventListener(
+            "click",
+            ()=>{
+                if(apps[app]){
+                    apps[app].style.display="none";
+                }
+            }
+        );
+    }
+});
+
+/* =========================================================
+   START
+========================================================= */
+
+const startButton=document.getElementById("startButton");
+const startMenu=document.getElementById("startMenu");
+
+startButton.addEventListener("click",event=>{
+    event.stopPropagation();
+
+    startMenu.style.display =
+        startMenu.style.display==="block"
+        ? "none"
+        : "block";
+});
+
+document.addEventListener("click",event=>{
+    if(
+        !startMenu.contains(event.target) &&
+        event.target!==startButton
+    ){
+        startMenu.style.display="none";
+    }
+});
+
+const startMap={
+    startPaint:"paint",
+    startNotepad:"notepad",
+    startClock:"clockWindow",
+    startMinecraft:"minecraft",
+    startCmd:"cmd",
+    startBrowser:"browser",
+    startCalculator:"calculator",
+    startFiles:"fileManager",
+    startGallery:"gallery",
+    startMusic:"music",
+    startSettings:"settings",
+    startAI:"nexusAI",
+    startMonitor:"systemMonitor",
+    startSecurity:"securityCenter",
+    startGames:"gameCenter",
+    startEffects:"effects",
+    startMaps:"nexusMaps",
+    startWeather:"weather"
+};
+
+Object.entries(startMap).forEach(([button,app])=>{
+    document.getElementById(button).addEventListener(
+        "click",
+        ()=>{
+            openApp(app);
+        }
+    );
+});
+
+/* IKONY */
+
+document.getElementById("clockIcon")
+.addEventListener(
+    "dblclick",
+    ()=>openApp("clockWindow")
+);
+
+document.getElementById("minecraftIcon")
+.addEventListener(
+    "dblclick",
+    ()=>openApp("minecraft")
+);
+
+document.getElementById("notepadIcon")
+.addEventListener(
+    "dblclick",
+    ()=>openApp("notepad")
+);
+
+/* TASKBAR */
+
+document.querySelectorAll(".taskbarApp").forEach(button=>{
+    button.addEventListener(
+        "click",
+        ()=>openApp(button.dataset.app)
+    );
+});
+
+/* =========================================================
+   TASKBAR CLOCK
+========================================================= */
+
+function updateTaskbarClock(){
+
+    const now=new Date();
+
+    document.getElementById("taskbarClock").innerHTML =
+        now.toLocaleTimeString("pl-PL")+
+        "<br>NEXUS OS";
+}
+
+setInterval(updateTaskbarClock,1000);
+updateTaskbarClock();
+
+/* =========================================================
+   PAINT
+========================================================= */
+
+const paintCanvas=document.getElementById("paintCanvas");
+const paintCtx=paintCanvas.getContext("2d");
+
+let paintColor="#000";
+let painting=false;
+
+function resizePaint(){
+
+    if(
+        paintCanvas.clientWidth<=0 ||
+        paintCanvas.clientHeight<=0
+    ){
+        return;
+    }
+
+    const old=document.createElement("canvas");
+
+    old.width=paintCanvas.width;
+    old.height=paintCanvas.height;
+
+    if(old.width && old.height){
+        old.getContext("2d").drawImage(
+            paintCanvas,
+            0,
+            0
+        );
+    }
+
+    paintCanvas.width=paintCanvas.clientWidth;
+    paintCanvas.height=paintCanvas.clientHeight;
+
+    paintCtx.fillStyle="#fff";
+
+    paintCtx.fillRect(
+        0,
+        0,
+        paintCanvas.width,
+        paintCanvas.height
+    );
+
+    if(old.width && old.height){
+        paintCtx.drawImage(
+            old,
+            0,
+            0,
+            old.width,
+            old.height,
+            0,
+            0,
+            paintCanvas.width,
+            paintCanvas.height
+        );
+    }
+}
+
+function paintMove(event){
+
+    if(!painting){
+        return;
+    }
+
+    const rect=paintCanvas.getBoundingClientRect();
+
+    const x=event.clientX-rect.left;
+    const y=event.clientY-rect.top;
+
+    paintCtx.lineWidth=5;
+    paintCtx.lineCap="round";
+    paintCtx.strokeStyle=paintColor;
+
+    paintCtx.lineTo(x,y);
+    paintCtx.stroke();
+
+    paintCtx.beginPath();
+    paintCtx.moveTo(x,y);
+}
+
+paintCanvas.addEventListener(
+    "pointerdown",
+    event=>{
+        painting=true;
+        paintMove(event);
+    }
+);
+
+paintCanvas.addEventListener(
+    "pointermove",
+    paintMove
+);
+
+["pointerup","pointerleave"].forEach(event=>{
+    paintCanvas.addEventListener(
+        event,
+        ()=>{
+            painting=false;
+            paintCtx.beginPath();
+        }
+    );
+});
+
+[
+    ["paintBlack","#000"],
+    ["paintRed","#e33"],
+    ["paintBlue","#2277ee"],
+    ["paintGreen","#20a050"],
+    ["paintErase","#fff"]
+].forEach(([id,color])=>{
+    document.getElementById(id).addEventListener(
+        "click",
+        ()=>{
+            paintColor=color;
+        }
+    );
+});
+
+document.getElementById("paintClear").addEventListener(
+    "click",
+    ()=>{
+        paintCtx.fillStyle="#fff";
+
+        paintCtx.fillRect(
+            0,
+            0,
+            paintCanvas.width,
+            paintCanvas.height
+        );
+    }
+);
+
+window.addEventListener("resize",resizePaint);
+
+/* =========================================================
+   ZEGAR
+========================================================= */
+
+function updateBigClock(){
+
+    const now=new Date();
+
+    document.getElementById("bigClock").textContent =
+        now.toLocaleTimeString("pl-PL");
+
+    document.getElementById("clockDate").textContent =
+        now.toLocaleDateString(
+            "pl-PL",
+            {
+                weekday:"long",
+                year:"numeric",
+                month:"long",
+                day:"numeric"
+            }
+        );
+}
+
+setInterval(updateBigClock,1000);
+updateBigClock();
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+let timerSeconds=0;
+let timerInterval=null;
+let audioContext=null;
+let alarmInterval=null;
+
+const timerInput=document.getElementById("timerInput");
+const timerDisplay=document.getElementById("timerDisplay");
+const alarmMessage=document.getElementById("alarmMessage");
+
+function formatDuration(seconds){
+
+    const h=Math.floor(seconds/3600);
+    const m=Math.floor((seconds%3600)/60);
+    const s=seconds%60;
+
+    if(h){
+        return (
+            String(h).padStart(2,"0")+
+            ":"+
+            String(m).padStart(2,"0")+
+            ":"+
+            String(s).padStart(2,"0")
+        );
+    }
+
+    return (
+        String(m).padStart(2,"0")+
+        ":"+
+        String(s).padStart(2,"0")
+    );
+}
+
+function playBeep(){
+
+    if(!audioContext){
+        return;
+    }
+
+    const oscillator=audioContext.createOscillator();
+    const gain=audioContext.createGain();
+
+    oscillator.frequency.value=850;
+    gain.gain.value=.12;
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.start();
+
+    oscillator.stop(
+        audioContext.currentTime+.18
+    );
+}
+
+function stopAlarm(){
+
+    clearInterval(alarmInterval);
+
+    alarmInterval=null;
+
+    alarmMessage.style.display="none";
+}
+
+function triggerAlarm(){
+
+    clearInterval(alarmInterval);
+
+    alarmInterval=setInterval(
+        playBeep,
+        700
+    );
+
+    alarmMessage.style.display="block";
+
+    timerDisplay.textContent="00:00";
+
+    clearInterval(timerInterval);
+}
+
+alarmMessage.addEventListener(
+    "click",
+    stopAlarm
+);
+
+document.getElementById("startTimer").addEventListener(
+    "click",
+    async ()=>{
+        if(!audioContext){
+            audioContext=
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+        }
+
+        if(audioContext.state==="suspended"){
+            await audioContext.resume();
+        }
+
+        stopAlarm();
+
+        clearInterval(timerInterval);
+
+        const parts=
+            timerInput.value.split(":").map(Number);
+
+        timerSeconds=
+            parts.length===3
+            ? parts[0]*3600+parts[1]*60+parts[2]
+            : parts.length===2
+            ? parts[0]*60+parts[1]
+            : 0;
+
+        timerDisplay.textContent=
+            formatDuration(timerSeconds);
+
+        if(timerSeconds<=0){
+            triggerAlarm();
+            return;
+        }
+
+        timerInterval=setInterval(
+            ()=>{
+                timerSeconds--;
+
+                timerDisplay.textContent=
+                    formatDuration(timerSeconds);
+
+                if(timerSeconds<=0){
+                    triggerAlarm();
+                }
+            },
+            1000
+        );
+    }
+);
+
+document.getElementById("stopTimer").addEventListener(
+    "click",
+    ()=>{
+        clearInterval(timerInterval);
+        stopAlarm();
+    }
+);
+
+/* =========================================================
+   KALKULATOR
+========================================================= */
+
+let calcExpression="";
+
+const calcDisplay=
+    document.getElementById("calcDisplay");
+
+document.querySelectorAll("[data-calc]").forEach(button=>{
+    button.addEventListener(
+        "click",
+        ()=>{
+            const value=button.dataset.calc;
+
+            if(value==="clear"){
+
+                calcExpression="";
+                calcDisplay.value="0";
+
+            }else if(value==="back"){
+
+                calcExpression=
+                    calcExpression.slice(0,-1);
+
+                calcDisplay.value=
+                    calcExpression || "0";
+
+            }else if(value==="="){
+
+                try{
+
+                    const safe=
+                        calcExpression.replace(
+                            /[^0-9+\-*/().]/g,
+                            ""
+                        );
+
+                    const result=
+                        Function(
+                            `"use strict";return (${safe})`
+                        )();
+
+                    calcExpression=String(result);
+                    calcDisplay.value=calcExpression;
+
+                }catch{
+
+                    calcExpression="";
+                    calcDisplay.value="Błąd";
+                }
+
+            }else{
+
+                calcExpression+=value;
+                calcDisplay.value=calcExpression;
+            }
+        }
+    );
+});
+
+/* =========================================================
+   MUZYKA
+========================================================= */
+
+let musicPlaying=false;
+let musicOscillator=null;
+
+const musicDisc=document.getElementById("musicDisc");
+const musicPlay=document.getElementById("musicPlay");
+
+musicPlay.addEventListener(
+    "click",
+    async ()=>{
+        if(!audioContext){
+            audioContext=
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+        }
+
+        if(audioContext.state==="suspended"){
+            await audioContext.resume();
+        }
+
+        if(!musicPlaying){
+
+            musicOscillator=
+                audioContext.createOscillator();
+
+            const gain=
+                audioContext.createGain();
+
+            musicOscillator.frequency.value=220;
+            gain.gain.value=.02;
+
+            musicOscillator.connect(gain);
+            gain.connect(audioContext.destination);
+
+            musicOscillator.start();
+
+            musicPlaying=true;
+
+            musicDisc.classList.add("playing");
+
+            musicPlay.textContent=
+                "⏸ Zatrzymaj";
+
+        }else{
+
+            try{
+                musicOscillator.stop();
+            }catch{}
+
+            musicOscillator=null;
+            musicPlaying=false;
+
+            musicDisc.classList.remove("playing");
+
+            musicPlay.textContent=
+                "▶ Odtwarzaj";
+        }
+    }
+);
+
+/* =========================================================
+   NOTATNIK
+========================================================= */
+
+const notepadArea=
+    document.getElementById("notepadArea");
+
+notepadArea.value=
+    localStorage.getItem("nexusNotepad") || "";
+
+notepadArea.addEventListener(
+    "input",
+    ()=>{
+        localStorage.setItem(
+            "nexusNotepad",
+            notepadArea.value
+        );
+    }
+);
+
+/* =========================================================
+   USTAWIENIA
+========================================================= */
+
+function setTheme(theme){
+
+    const backgrounds={
+
+        dark:
+        "linear-gradient(135deg,#10192e,#070b14 70%)",
+
+        blue:
+        "linear-gradient(135deg,#0b2a62,#07101f)",
+
+        green:
+        "linear-gradient(135deg,#0b422a,#06140d)",
+
+        purple:
+        "linear-gradient(135deg,#3b195d,#100717)"
+    };
+
+    document.getElementById("desktop").style.background=
+        backgrounds[theme];
+}
+
+themeDark.onclick=()=>setTheme("dark");
+themeBlue.onclick=()=>setTheme("blue");
+themeGreen.onclick=()=>setTheme("green");
+themePurple.onclick=()=>setTheme("purple");
+
+/* =========================================================
+   NEXUS AI
+========================================================= */
+
+let nexusApiKey="";
+let nexusAiMessages=[];
+
+const aiKey=document.getElementById("aiKey");
+const aiStart=document.getElementById("aiStart");
+const aiStatus=document.getElementById("aiStatus");
+const aiMessages=document.getElementById("aiMessages");
+const aiInput=document.getElementById("aiInput");
+const aiSend=document.getElementById("aiSend");
+const aiClear=document.getElementById("aiClear");
+const aiLogout=document.getElementById("aiLogout");
+
+function aiAddMessage(text,type){
+
+    const message=
+        document.createElement("div");
+
+    message.className=
+        "aiMessage "+
+        (type==="user" ? "aiUser" : "aiBot");
+
+    message.textContent=text;
+
+    aiMessages.appendChild(message);
+
+    aiMessages.scrollTop=
+        aiMessages.scrollHeight;
+}
+
+function startNexusAI(){
+
+    const key=
+        aiKey.value.trim();
+
+    if(!key){
+
+        aiStatus.textContent=
+            "❌ Wpisz Groq API Key.";
+
+        return;
+    }
+
+    nexusApiKey=key;
+    nexusAiMessages=[];
+
+    aiMessages.innerHTML="";
+
+    aiStatus.textContent=
+        "🟢 NEXUS AI ONLINE";
+
+    aiAddMessage(
+        "Cześć! 👋 Jestem NEXUS AI.\n\n"+
+        "Możesz zadawać mi pytania.",
+        "bot"
+    );
+
+    aiKey.value="";
+}
+
+async function sendAI(){
+
+    const text=
+        aiInput.value.trim();
+
+    if(!text){
+        return;
+    }
+
+    if(!nexusApiKey){
+
+        aiAddMessage(
+            "Najpierw wpisz Groq API Key i kliknij START AI.",
+            "bot"
+        );
+
+        return;
+    }
+
+    aiInput.value="";
+
+    aiAddMessage(
+        text,
+        "user"
+    );
+
+    nexusAiMessages.push({
+        role:"user",
+        content:text
+    });
+
+    aiStatus.textContent=
+        "🟡 NEXUS AI MYŚLI...";
+
+    const waiting=
+        document.createElement("div");
+
+    waiting.className=
+        "aiMessage aiBot";
+
+    waiting.textContent=
+        "⏳ Szukam odpowiedzi...";
+
+    aiMessages.appendChild(waiting);
+
+    aiMessages.scrollTop=
+        aiMessages.scrollHeight;
+
+    try{
+
+        const response=
+            await fetch(
+                "/api/ai/chat",
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:JSON.stringify({
+                        apiKey:nexusApiKey,
+                        messages:nexusAiMessages
+                    })
+                }
+            );
+
+        const data=
+            await response.json();
+
+        waiting.remove();
+
+        if(!response.ok){
+
+            throw new Error(
+                data.error ||
+                "Błąd Groq API."
+            );
+        }
+
+        nexusAiMessages.push({
+            role:"assistant",
+            content:data.reply
+        });
+
+        aiAddMessage(
+            data.reply,
+            "bot"
+        );
+
+        aiStatus.textContent=
+            "🟢 NEXUS AI ONLINE";
+
+    }catch(error){
+
+        waiting.remove();
+
+        aiAddMessage(
+            "❌ "+error.message,
+            "bot"
+        );
+
+        aiStatus.textContent=
+            "🔴 BŁĄD AI";
+    }
+}
+
+aiStart.addEventListener(
+    "click",
+    startNexusAI
+);
+
+aiSend.addEventListener(
+    "click",
+    sendAI
+);
+
+aiInput.addEventListener(
+    "keydown",
+    event=>{
+        if(
+            event.key==="Enter" &&
+            !event.shiftKey
+        ){
+            event.preventDefault();
+            sendAI();
+        }
+    }
+);
+
+aiClear.addEventListener(
+    "click",
+    ()=>{
+        nexusAiMessages=[];
+        aiMessages.innerHTML="";
+    }
+);
+
+aiLogout.addEventListener(
+    "click",
+    ()=>{
+        nexusApiKey="";
+        nexusAiMessages=[];
+
+        aiMessages.innerHTML="";
+
+        aiStatus.textContent=
+            "⚪ AI wyłączony";
+
+        aiKey.value="";
+    }
+);
+
+/* =========================================================
+   MONITOR
+========================================================= */
+
+const monitorCanvas=
+    document.getElementById("monitorGraph");
+
+const monitorCtx=
+    monitorCanvas.getContext("2d");
+
+let monitorData=
+    Array.from(
+        {length:70},
+        ()=>20+Math.random()*50
+    );
+
+function resizeMonitor(){
+
+    monitorCanvas.width=
+        monitorCanvas.clientWidth;
+
+    monitorCanvas.height=
+        monitorCanvas.clientHeight;
+}
+
+function drawMonitorGraph(){
+
+    resizeMonitor();
+
+    monitorCtx.clearRect(
+        0,
+        0,
+        monitorCanvas.width,
+        monitorCanvas.height
+    );
+
+    monitorCtx.strokeStyle=
+        "#2864d7";
+
+    monitorCtx.lineWidth=3;
+
+    monitorCtx.beginPath();
+
+    monitorData.forEach(
+        (value,index)=>{
+
+            const x=
+                index*
+                monitorCanvas.width/
+                (monitorData.length-1);
+
+            const y=
+                monitorCanvas.height-
+                value/100*
+                monitorCanvas.height;
+
+            if(index){
+                monitorCtx.lineTo(x,y);
+            }else{
+                monitorCtx.moveTo(x,y);
+            }
+        }
+    );
+
+    monitorCtx.stroke();
+}
+
+function updateMonitor(){
+
+    const cpu=
+        Math.floor(
+            15+Math.random()*75
+        );
+
+    const ram=
+        Math.floor(
+            25+Math.random()*55
+        );
+
+    document.getElementById("cpuValue").textContent=
+        cpu+"%";
+
+    document.getElementById("ramValue").textContent=
+        ram+"%";
+
+    document.getElementById("fpsValue").textContent=
+        Math.floor(
+            55+Math.random()*15
+        );
+
+    document.getElementById("tempValue").textContent=
+        Math.floor(
+            38+Math.random()*25
+        )+"°C";
+
+    document.getElementById("cpuFill").style.width=
+        cpu+"%";
+
+    document.getElementById("ramFill").style.width=
+        ram+"%";
+
+    monitorData.push(cpu);
+
+    if(monitorData.length>70){
+        monitorData.shift();
+    }
+
+    if(
+        apps.systemMonitor.style.display!=="none"
+    ){
+        drawMonitorGraph();
+    }
+}
+
+setInterval(updateMonitor,1000);
+
+/* =========================================================
+   SECURITY
+========================================================= */
+
+const securityTests=[
+    "securityFirewall",
+    "securityKernel",
+    "securityNetwork",
+    "securityStorage",
+    "securityApps"
+];
+
+document.getElementById("securityScan")
+.addEventListener(
+    "click",
+    async ()=>{
+        const button=
+            document.getElementById("securityScan");
+
+        button.disabled=true;
+
+        document.getElementById(
+            "securityStatus"
+        ).textContent=
+            "🔍 SKANOWANIE...";
+
+        for(
+            const id of securityTests
+        ){
+
+            const status=
+                document
+                .getElementById(id)
+                .querySelector("span");
+
+            status.className=
+                "securityPending";
+
+            status.textContent=
+                "Skanowanie...";
+
+            await new Promise(
+                resolve=>
+                    setTimeout(resolve,450)
+            );
+
+            status.className=
+                "securityGood";
+
+            status.textContent=
+                "✓ OK";
+        }
+
+        document.getElementById(
+            "securityStatus"
+        ).textContent=
+            "SYSTEM BEZPIECZNY 🟢";
+
+        button.disabled=false;
+
+        button.textContent=
+            "🔄 Uruchom ponownie skan";
+    }
+);
+
+/* =========================================================
+   GAME CENTER
+========================================================= */
+
+let reactionWaiting=false;
+let reactionReady=false;
+let reactionStartedAt=0;
+let reactionTimer=null;
+
+const gameMenu=
+    document.getElementById("gameMenu");
+
+const reactionGame=
+    document.getElementById("reactionGame");
+
+const reactionTitle=
+    document.getElementById("reactionTitle");
+
+const reactionButton=
+    document.getElementById("reactionButton");
+
+const reactionResult=
+    document.getElementById("reactionResult");
+
+const reactionCard=
+    document.getElementById("reactionCard");
+
+function startReactionGame(){
+
+    reactionWaiting=true;
+    reactionReady=false;
+
+    reactionResult.textContent="";
+
+    reactionTitle.textContent=
+        "Czekaj na zielone...";
+
+    reactionButton.textContent=
+        "CZEKAJ...";
+
+    reactionButton.style.background=
+        "#202638";
+
+    clearTimeout(reactionTimer);
+
+    reactionTimer=
+        setTimeout(
+            ()=>{
+                reactionWaiting=false;
+                reactionReady=true;
+
+                reactionStartedAt=
+                    performance.now();
+
+                reactionTitle.textContent=
+                    "TERAZ! ⚡";
+
+                reactionButton.textContent=
+                    "KLIKNIJ!";
+
+                reactionButton.style.background=
+                    "#229b52";
+            },
+            1200+Math.random()*2500
+        );
+}
+
+reactionCard.addEventListener(
+    "click",
+    ()=>{
+        gameMenu.style.display="none";
+        reactionGame.style.display="block";
+
+        startReactionGame();
+    }
+);
+
+reactionButton.addEventListener(
+    "click",
+    ()=>{
+        if(reactionWaiting){
+
+            clearTimeout(reactionTimer);
+
+            reactionWaiting=false;
+
+            reactionTitle.textContent=
+                "Za wcześnie! 😅";
+
+            reactionResult.textContent=
+                "Spróbuj ponownie.";
+
+            reactionButton.textContent=
+                "START";
+
+            reactionButton.style.background=
+                "#9b293d";
+
+        }else if(reactionReady){
+
+            reactionResult.textContent=
+                Math.round(
+                    performance.now()-
+                    reactionStartedAt
+                )+
+                " ms ⚡";
+
+            reactionReady=false;
+
+            reactionButton.textContent=
+                "ZAGRAJ PONOWNIE";
+
+            reactionButton.style.background=
+                "#2864d7";
+
+        }else{
+
+            startReactionGame();
+        }
+    }
+);
+
+/* =========================================================
+   EFFECTS
+========================================================= */
+
+const effectsCanvas=
+    document.getElementById("effectsCanvas");
+
+const effectsCtx=
+    effectsCanvas.getContext("2d");
+
+let effectMode=null;
+let effectRunning=false;
+let effectParticles=[];
+
+function resizeEffectsCanvas(){
+
+    effectsCanvas.width=
+        innerWidth;
+
+    effectsCanvas.height=
+        innerHeight;
+}
+
+function resetEffects(){
+
+    effectMode=null;
+    effectRunning=false;
+    effectParticles=[];
+
+    effectsCanvas.style.display=
+        "none";
+
+    document.getElementById("desktop")
+        .style.filter="";
+}
+
+function startEffect(mode){
+
+    effectMode=mode;
+    effectRunning=true;
+
+    effectsCanvas.style.display=
+        "block";
+
+    effectParticles=
+        Array.from(
+            {length:180},
+            ()=>
+            ({
+                x:Math.random()*innerWidth,
+                y:Math.random()*innerHeight,
+                vx:(Math.random()-.5)*1.5,
+                vy:1+Math.random()*4,
+                size:1+Math.random()*4
+            })
+        );
+
+    drawEffects();
+}
+
+function drawEffects(){
+
+    if(!effectRunning){
+        return;
+    }
+
+    effectsCtx.clearRect(
+        0,
+        0,
+        effectsCanvas.width,
+        effectsCanvas.height
+    );
+
+    if(effectMode==="snow"){
+
+        effectsCtx.fillStyle=
+            "rgba(255,255,255,.9)";
+
+        effectParticles.forEach(p=>{
+
+            p.y+=p.vy;
+            p.x+=p.vx;
+
+            if(p.y>innerHeight){
+                p.y=-10;
+            }
+
+            if(p.x>innerWidth){
+                p.x=0;
+            }
+
+            if(p.x<0){
+                p.x=innerWidth;
+            }
+
+            effectsCtx.beginPath();
+
+            effectsCtx.arc(
+                p.x,
+                p.y,
+                p.size,
+                0,
+                Math.PI*2
+            );
+
+            effectsCtx.fill();
+        });
+    }
+
+    if(effectMode==="rain"){
+
+        effectsCtx.strokeStyle=
+            "rgba(80,180,255,.6)";
+
+        effectParticles.forEach(p=>{
+
+            p.y+=p.vy*4;
+
+            if(p.y>innerHeight){
+
+                p.y=-20;
+                p.x=Math.random()*innerWidth;
+            }
+
+            effectsCtx.beginPath();
+
+            effectsCtx.moveTo(
+                p.x,
+                p.y
+            );
+
+            effectsCtx.lineTo(
+                p.x-2,
+                p.y+15
+            );
+
+            effectsCtx.stroke();
+        });
+    }
+
+    if(effectMode==="matrix"){
+
+        effectsCtx.fillStyle=
+            "rgba(0,0,0,.08)";
+
+        effectsCtx.fillRect(
+            0,
+            0,
+            innerWidth,
+            innerHeight
+        );
+
+        effectsCtx.fillStyle=
+            "#28ff70";
+
+        effectsCtx.font=
+            "16px monospace";
+
+        effectParticles.forEach(p=>{
+
+            p.y+=p.vy*3;
+
+            if(p.y>innerHeight){
+
+                p.y=0;
+                p.x=Math.random()*innerWidth;
+            }
+
+            effectsCtx.fillText(
+                "01NEXUS"[
+                    Math.floor(
+                        Math.random()*7
+                    )
+                ],
+                p.x,
+                p.y
+            );
+        });
+    }
+
+    if(effectMode==="stars"){
+
+        effectsCtx.fillStyle=
+            "rgba(255,255,255,.9)";
+
+        effectParticles.forEach(p=>{
+
+            p.y+=p.vy*.25;
+
+            if(p.y>innerHeight){
+                p.y=0;
+            }
+
+            effectsCtx.fillRect(
+                p.x,
+                p.y,
+                p.size,
+                p.size
+            );
+        });
+    }
+
+    requestAnimationFrame(
+        drawEffects
+    );
+}
+
+document.getElementById("snowEffect")
+.addEventListener(
+    "click",
+    ()=>startEffect("snow")
+);
+
+document.getElementById("rainEffect")
+.addEventListener(
+    "click",
+    ()=>startEffect("rain")
+);
+
+document.getElementById("matrixEffect")
+.addEventListener(
+    "click",
+    ()=>startEffect("matrix")
+);
+
+document.getElementById("starsEffect")
+.addEventListener(
+    "click",
+    ()=>startEffect("stars")
+);
+
+document.getElementById("nightEffect")
+.addEventListener(
+    "click",
+    ()=>{
+        const desktop=
+            document.getElementById("desktop");
+
+        desktop.style.filter=
+            desktop.style.filter==="brightness(0.55)"
+            ? ""
+            : "brightness(0.55)";
+    }
+);
+
+document.getElementById("resetEffects")
+.addEventListener(
+    "click",
+    resetEffects
+);
+
+resizeEffectsCanvas();
+
+window.addEventListener(
+    "resize",
+    resizeEffectsCanvas
+);
+
+/* =========================================================
+   MAPS
+========================================================= */
+
+const mapCanvas=
+    document.getElementById("mapCanvas");
+
+const mapCtx=
+    mapCanvas.getContext("2d");
+
+let mapOffsetX=0;
+let mapOffsetY=0;
+let mapZoom=1;
+let mapDragging=false;
+let mapLastX=0;
+let mapLastY=0;
+
+function resizeMap(){
+
+    mapCanvas.width=
+        mapCanvas.clientWidth;
+
+    mapCanvas.height=
+        mapCanvas.clientHeight;
+
+    drawMap();
+}
+
+function drawMap(){
+
+    const w=mapCanvas.width;
+    const h=mapCanvas.height;
+
+    mapCtx.clearRect(
+        0,
+        0,
+        w,
+        h
+    );
+
+    mapCtx.fillStyle="#bfd3ad";
+
+    mapCtx.fillRect(
+        0,
+        0,
+        w,
+        h
+    );
+
+    mapCtx.save();
+
+    mapCtx.translate(
+        w/2+mapOffsetX,
+        h/2+mapOffsetY
+    );
+
+    mapCtx.scale(
+        mapZoom,
+        mapZoom
+    );
+
+    mapCtx.strokeStyle="#8f999f";
+    mapCtx.lineWidth=55;
+
+    mapCtx.beginPath();
+
+    mapCtx.moveTo(-700,0);
+    mapCtx.lineTo(700,0);
+
+    mapCtx.moveTo(0,-500);
+    mapCtx.lineTo(0,500);
+
+    mapCtx.stroke();
+
+    mapCtx.lineWidth=24;
+
+    for(let i=-4;i<=4;i++){
+
+        mapCtx.beginPath();
+
+        mapCtx.moveTo(
+            -600,
+            i*120
+        );
+
+        mapCtx.lineTo(
+            600,
+            i*120
+        );
+
+        mapCtx.stroke();
+    }
+
+    const buildings=[
+        {
+            x:-320,
+            y:-210,
+            w:190,
+            h:125,
+            c:"#cf8b69",
+            n:"SZKOŁA"
+        },
+        {
+            x:100,
+            y:-180,
+            w:210,
+            h:150,
+            c:"#7e9bc5",
+            n:"CENTRUM"
+        },
+        {
+            x:-330,
+            y:120,
+            w:210,
+            h:145,
+            c:"#6b777f",
+            n:"KOPALNIA"
+        },
+        {
+            x:130,
+            y:130,
+            w:190,
+            h:140,
+            c:"#879b72",
+            n:"LAS"
+        }
+    ];
+
+    buildings.forEach(b=>{
+
+        mapCtx.fillStyle=b.c;
+
+        mapCtx.fillRect(
+            b.x,
+            b.y,
+            b.w,
+            b.h
+        );
+
+        mapCtx.fillStyle="#fff";
+
+        mapCtx.font=
+            "bold 18px Arial";
+
+        mapCtx.fillText(
+            b.n,
+            b.x+15,
+            b.y+30
+        );
+    });
+
+    mapCtx.fillStyle="#68a95d";
+
+    mapCtx.beginPath();
+
+    mapCtx.arc(
+        -40,
+        260,
+        100,
+        0,
+        Math.PI*2
+    );
+
+    mapCtx.fill();
+
+    mapCtx.fillStyle="#ed3348";
+
+    mapCtx.beginPath();
+
+    mapCtx.arc(
+        0,
+        0,
+        16,
+        0,
+        Math.PI*2
+    );
+
+    mapCtx.fill();
+
+    mapCtx.restore();
+}
+
+mapCanvas.addEventListener(
+    "pointerdown",
+    event=>{
+
+        mapDragging=true;
+
+        mapLastX=event.clientX;
+        mapLastY=event.clientY;
+
+        mapCanvas.setPointerCapture(
+            event.pointerId
+        );
+
+        mapCanvas.style.cursor=
+            "grabbing";
+    }
+);
+
+mapCanvas.addEventListener(
+    "pointermove",
+    event=>{
+
+        if(!mapDragging){
+            return;
+        }
+
+        mapOffsetX+=
+            event.clientX-mapLastX;
+
+        mapOffsetY+=
+            event.clientY-mapLastY;
+
+        mapLastX=event.clientX;
+        mapLastY=event.clientY;
+
+        drawMap();
+    }
+);
+
+mapCanvas.addEventListener(
+    "pointerup",
+    event=>{
+
+        mapDragging=false;
+
+        mapCanvas.style.cursor="grab";
+
+        try{
+            mapCanvas.releasePointerCapture(
+                event.pointerId
+            );
+        }catch{}
+    }
+);
+
+mapCanvas.addEventListener(
+    "wheel",
+    event=>{
+
+        event.preventDefault();
+
+        mapZoom=
+            Math.max(
+                .6,
+                Math.min(
+                    2.2,
+                    mapZoom+
+                    (event.deltaY<0?.1:-.1)
+                )
+            );
+
+        drawMap();
+    },
+    {passive:false}
+);
+
+window.addEventListener(
+    "resize",
+    resizeMap
+);
+
+/* =========================================================
+   WEATHER
+========================================================= */
+
+const weatherCity=
+    document.getElementById("weatherCity");
+
+const weatherDescription=
+    document.getElementById("weatherDescription");
+
+const weatherIcon=
+    document.getElementById("weatherIcon");
+
+const weatherTemperature=
+    document.getElementById("weatherTemperature");
+
+const weatherFeels=
+    document.getElementById("weatherFeels");
+
+const weatherWind=
+    document.getElementById("weatherWind");
+
+const weatherRain=
+    document.getElementById("weatherRain");
+
+const weatherTime=
+    document.getElementById("weatherTime");
+
+const weatherStatus=
+    document.getElementById("weatherStatus");
+
+const weatherCityInput=
+    document.getElementById("weatherCityInput");
+
+function weatherIconFromCode(code){
+
+    if(code===0) return "☀️";
+    if(code===1) return "🌤️";
+    if(code===2) return "⛅";
+    if(code===3) return "☁️";
+
+    if(code===45 || code===48){
+        return "🌫️";
+    }
+
+    if(code>=51 && code<=67){
+        return "🌧️";
+    }
+
+    if(code>=71 && code<=77){
+        return "❄️";
+    }
+
+    if(code>=80 && code<=82){
+        return "🌦️";
+    }
+
+    if(code>=95){
+        return "⛈️";
+    }
+
+    return "🌤️";
+}
+
+async function loadWeather(city="wroclaw"){
+
+    weatherStatus.textContent=
+        "🟡 Pobieranie aktualnej pogody...";
+
+    try{
+
+        const response=
+            await fetch(
+                "/api/weather?city="+
+                encodeURIComponent(city)
+            );
+
+        const data=
+            await response.json();
+
+        if(!response.ok){
+            throw new Error(
+                data.error ||
+                "Nie udało się pobrać pogody."
+            );
+        }
+
+        weatherCity.textContent=
+            data.city;
+
+        weatherDescription.textContent=
+            data.description;
+
+        weatherIcon.textContent=
+            weatherIconFromCode(
+                data.weatherCode
+            );
+
+        weatherTemperature.textContent=
+            Math.round(
+                data.temperature
+            )+"°C";
+
+        weatherFeels.textContent=
+            Math.round(
+                data.apparentTemperature
+            )+"°C";
+
+        weatherWind.textContent=
+            data.windSpeed+
+            " km/h";
+
+        weatherRain.textContent=
+            data.precipitation+
+            " mm";
+
+        if(data.time){
+
+            const time=
+                new Date(data.time);
+
+            weatherTime.textContent=
+                time.toLocaleTimeString(
+                    "pl-PL",
+                    {
+                        hour:"2-digit",
+                        minute:"2-digit"
+                    }
+                );
+        }
+
+        weatherStatus.textContent=
+            "🟢 Aktualne dane pogodowe";
+
+    }catch(error){
+
+        weatherStatus.textContent=
+            "🔴 "+error.message;
+    }
+}
+
+document.getElementById("weatherSearch")
+.addEventListener(
+    "click",
+    ()=>{
+        const city=
+            weatherCityInput.value.trim();
+
+        if(!city){
+            return;
+        }
+
+        loadWeather(city);
+    }
+);
+
+document.getElementById("weatherRefresh")
+.addEventListener(
+    "click",
+    ()=>{
+        loadWeather(
+            weatherCityInput.value.trim()
+            || "wroclaw"
+        );
+    }
+);
+
+weatherCityInput.addEventListener(
+    "keydown",
+    event=>{
+        if(event.key==="Enter"){
+            document
+                .getElementById("weatherSearch")
+                .click();
+        }
+    }
+);
+
+/* =========================================================
+   MINECRAFT 2D
+========================================================= */
+
+const mcCanvas=
+    document.getElementById("mcCanvas");
+
+const mcCtx=
+    mcCanvas.getContext("2d");
+
+const BLOCK_SIZE=32;
+
+let mcKeys={};
+let mcSelectedBlock=0;
+let world=[];
+
+const WORLD_WIDTH=150;
+const WORLD_HEIGHT=25;
+
+const blockColors=[
+    "#69b34c",
+    "#815b39",
+    "#73777d",
+    "#8a633e",
+    "#d9bf69",
+    "#a84a3c",
+    "#3d8a3d",
+    "#535961"
+];
+
+function generateWorld(){
+
+    world=[];
+
+    for(
+        let y=0;
+        y<WORLD_HEIGHT;
+        y++
+    ){
+
+        world[y]=[];
+
+        for(
+            let x=0;
+            x<WORLD_WIDTH;
+            x++
+        ){
+
+            world[y][x]=
+                y>13
+                ? y===14
+                    ? 0
+                    : y===15
+                        ? 1
+                        : 2
+                : null;
+        }
+    }
+
+    [
+        10,
+        20,
+        33,
+        48,
+        72,
+        87,
+        110,
+        128
+    ].forEach(x=>{
+
+        for(let y=9;y<=13;y++){
+            world[y][x]=3;
+        }
+
+        for(let yy=7;yy<=9;yy++){
+
+            for(let xx=-2;xx<=2;xx++){
+
+                if(
+                    Math.abs(xx)+
+                    Math.abs(yy-8)<=3 &&
+                    x+xx>=0 &&
+                    x+xx<WORLD_WIDTH
+                ){
+
+                    world[yy][x+xx]=6;
+                }
+            }
+        }
+    });
+}
+
+generateWorld();
+
+const mcPlayer={
+    x:8*BLOCK_SIZE,
+    y:11*BLOCK_SIZE,
+    width:22,
+    height:30,
+    vx:0,
+    vy:0,
+    onGround:false
+};
+
+function resizeMinecraftCanvas(){
+
+    mcCanvas.width=
+        mcCanvas.clientWidth;
+
+    mcCanvas.height=
+        mcCanvas.clientHeight;
+}
+
+window.addEventListener(
+    "resize",
+    resizeMinecraftCanvas
+);
+
+function isSolidAt(px,py){
+
+    const x=
+        Math.floor(
+            px/BLOCK_SIZE
+        );
+
+    const y=
+        Math.floor(
+            py/BLOCK_SIZE
+        );
+
+    if(
+        x<0 ||
+        x>=WORLD_WIDTH ||
+        y<0 ||
+        y>=WORLD_HEIGHT
+    ){
+        return true;
+    }
+
+    return world[y][x]!==null;
+}
+
+function mcCollision(x,y){
+
+    return (
+        isSolidAt(x,y) ||
+        isSolidAt(
+            x+mcPlayer.width,
+            y
+        ) ||
+        isSolidAt(
+            x,
+            y+mcPlayer.height
+        ) ||
+        isSolidAt(
+            x+mcPlayer.width,
+            y+mcPlayer.height
+        )
+    );
+}
+
+function updateMinecraft(){
+
+    const speed=3.5;
+
+    mcPlayer.vx=0;
+
+    if(mcKeys.a||mcKeys.A){
+        mcPlayer.vx=-speed;
+    }
+
+    if(mcKeys.d||mcKeys.D){
+        mcPlayer.vx=speed;
+    }
+
+    if(
+        mcKeys[" "] &&
+        mcPlayer.onGround
+    ){
+
+        mcPlayer.vy=-10;
+        mcPlayer.onGround=false;
+    }
+
+    mcPlayer.vy+=.45;
+
+    const nextX=
+        mcPlayer.x+
+        mcPlayer.vx;
+
+    if(
+        !mcCollision(
+            nextX,
+            mcPlayer.y
+        )
+    ){
+        mcPlayer.x=nextX;
+    }
+
+    const nextY=
+        mcPlayer.y+
+        mcPlayer.vy;
+
+    if(
+        !mcCollision(
+            mcPlayer.x,
+            nextY
+        )
+    ){
+
+        mcPlayer.y=nextY;
+        mcPlayer.onGround=false;
+
+    }else{
+
+        if(mcPlayer.vy>0){
+            mcPlayer.onGround=true;
+        }
+
+        mcPlayer.vy=0;
+    }
+}
+
+function drawMinecraft(){
+
+    const width=mcCanvas.width;
+    const height=mcCanvas.height;
+
+    mcCtx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+    const sky=
+        mcCtx.createLinearGradient(
+            0,
+            0,
+            0,
+            height
+        );
+
+    sky.addColorStop(
+        0,
+        "#6eb6ff"
+    );
+
+    sky.addColorStop(
+        1,
+        "#cceaff"
+    );
+
+    mcCtx.fillStyle=sky;
+
+    mcCtx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+    const cameraX=
+        mcPlayer.x-
+        width/2;
+
+    const cameraY=
+        mcPlayer.y-
+        height/2;
+
+    mcCtx.save();
+
+    mcCtx.translate(
+        -cameraX,
+        -cameraY
+    );
+
+    mcCtx.fillStyle="#ffe37a";
+
+    mcCtx.beginPath();
+
+    mcCtx.arc(
+        cameraX+
+        width-
+        100,
+        cameraY+100,
+        45,
+        0,
+        Math.PI*2
+    );
+
+    mcCtx.fill();
+
+    const startX=
+        Math.max(
+            0,
+            Math.floor(
+                cameraX/BLOCK_SIZE
+            )-2
+        );
+
+    const endX=
+        Math.min(
+            WORLD_WIDTH,
+            Math.ceil(
+                (cameraX+width)/
+                BLOCK_SIZE
+            )+2
+        );
+
+    const startY=
+        Math.max(
+            0,
+            Math.floor(
+                cameraY/BLOCK_SIZE
+            )-2
+        );
+
+    const endY=
+        Math.min(
+            WORLD_HEIGHT,
+            Math.ceil(
+                (cameraY+height)/
+                BLOCK_SIZE
+            )+2
+        );
+
+    for(
+        let y=startY;
+        y<endY;
+        y++
+    ){
+
+        for(
+            let x=startX;
+            x<endX;
+            x++
+        ){
+
+            const block=
+                world[y][x];
+
+            if(block===null){
+                continue;
+            }
+
+            mcCtx.fillStyle=
+                blockColors[block];
+
+            mcCtx.fillRect(
+                x*BLOCK_SIZE,
+                y*BLOCK_SIZE,
+                BLOCK_SIZE,
+                BLOCK_SIZE
+            );
+
+            mcCtx.strokeStyle=
+                "rgba(0,0,0,.15)";
+
+            mcCtx.strokeRect(
+                x*BLOCK_SIZE,
+                y*BLOCK_SIZE,
+                BLOCK_SIZE,
+                BLOCK_SIZE
+            );
+        }
+    }
+
+    const px=mcPlayer.x;
+    const py=mcPlayer.y;
+
+    mcCtx.fillStyle="#2878d7";
+
+    mcCtx.fillRect(
+        px,
+        py+14,
+        22,
+        16
+    );
+
+    mcCtx.fillStyle="#d89a70";
+
+    mcCtx.fillRect(
+        px+3,
+        py,
+        16,
+        16
+    );
+
+    mcCtx.fillStyle="#4c2d19";
+
+    mcCtx.fillRect(
+        px+3,
+        py,
+        16,
+        4
+    );
+
+    mcCtx.fillStyle="#33251e";
+
+    mcCtx.fillRect(
+        px+5,
+        py+6,
+        3,
+        3
+    );
+
+    mcCtx.fillRect(
+        px+14,
+        py+6,
+        3,
+        3
+    );
+
+    mcCtx.fillStyle="#273041";
+
+    mcCtx.fillRect(
+        px+3,
+        py+30,
+        6,
+        4
+    );
+
+    mcCtx.fillRect(
+        px+13,
+        py+30,
+        6,
+        4
+    );
+
+    mcCtx.restore();
+}
+
+function mcLoop(){
+
+    updateMinecraft();
+    drawMinecraft();
+
+    requestAnimationFrame(mcLoop);
+}
+
+document.addEventListener(
+    "keydown",
+    event=>{
+
+        if(
+            apps.minecraft.style.display!=="flex"
+        ){
+            return;
+        }
+
+        mcKeys[event.key]=true;
+
+        if(
+            event.key===" " ||
+            ["a","A","d","D"].includes(event.key)
+        ){
+            event.preventDefault();
+        }
+
+        if(
+            event.key>="1" &&
+            event.key<="8"
+        ){
+
+            mcSelectedBlock=
+                Number(event.key)-1;
+
+            document
+                .querySelectorAll(".mcSlot")
+                .forEach(
+                    slot=>
+                        slot.classList.remove(
+                            "selected"
+                        )
+                );
+
+            document
+                .querySelector(
+                    `.mcSlot[data-slot="${mcSelectedBlock}"]`
+                )
+                .classList.add("selected");
+        }
+    }
+);
+
+document.addEventListener(
+    "keyup",
+    event=>{
+        mcKeys[event.key]=false;
+    }
+);
+
+mcCanvas.addEventListener(
+    "contextmenu",
+    event=>event.preventDefault()
+);
+
+mcCanvas.addEventListener(
+    "mousedown",
+    event=>{
+
+        const rect=
+            mcCanvas.getBoundingClientRect();
+
+        const cameraX=
+            mcPlayer.x-
+            mcCanvas.width/2;
+
+        const cameraY=
+            mcPlayer.y-
+            mcCanvas.height/2;
+
+        const worldX=
+            Math.floor(
+                (
+                    event.clientX-
+                    rect.left+
+                    cameraX
+                )/
+                BLOCK_SIZE
+            );
+
+        const worldY=
+            Math.floor(
+                (
+                    event.clientY-
+                    rect.top+
+                    cameraY
+                )/
+                BLOCK_SIZE
+            );
+
+        if(
+            worldX<0 ||
+            worldX>=WORLD_WIDTH ||
+            worldY<0 ||
+            worldY>=WORLD_HEIGHT
+        ){
+            return;
+        }
+
+        if(event.button===0){
+            world[worldY][worldX]=null;
+        }
+
+        if(
+            event.button===2 &&
+            world[worldY][worldX]===null
+        ){
+            world[worldY][worldX]=mcSelectedBlock;
+        }
+    }
+);
+
+document.querySelectorAll(".mcSlot")
+.forEach(slot=>{
+
+    slot.addEventListener(
+        "click",
+        ()=>{
+            mcSelectedBlock=
+                Number(slot.dataset.slot);
+
+            document
+                .querySelectorAll(".mcSlot")
+                .forEach(
+                    s=>
+                        s.classList.remove(
+                            "selected"
+                        )
+                );
+
+            slot.classList.add("selected");
+        }
+    );
+});
+
+/* =========================================================
+   CMD
+========================================================= */
+
+const cmdInput=
+    document.getElementById("cmdInput");
+
+const cmdOutput=
+    document.getElementById("cmdOutput");
+
+let commandHistory=[];
+let historyIndex=-1;
+
+function cmdPrint(text){
+
+    cmdOutput.textContent+=
+        "\n"+
+        text;
+
+    cmdOutput.scrollTop=
+        cmdOutput.scrollHeight;
+}
+
+function runCommand(command){
+
+    const raw=String(command).trim();
+
+    if(!raw){
+        return;
+    }
+
+    commandHistory.push(raw);
+
+    historyIndex=
+        commandHistory.length;
+
+    cmdPrint(
+        "C:\\NEXUS> "+
+        raw
+    );
+
+    const parts=
+        raw.split(/\s+/);
+
+    const cmd=
+        parts[0].toLowerCase();
+
+    switch(cmd){
+
+        case "help":
+
+            cmdPrint(`
+Dostępne komendy:
+
+help
+clear
+cls
+echo [tekst]
+time
+date
+apps
+about
+ver
+whoami
+pwd
+dir
+calc [działanie]
+say [tekst]
+open [aplikacja]
+browser
+weather [miasto]
+motd
+ping
+history
+stop
+
+Aplikacje:
+paint
+notepad
+clock
+minecraft
+cmd
+browser
+calculator
+files
+gallery
+music
+settings
+ai
+monitor
+security
+games
+effects
+maps
+weather
+`);
+
+            break;
+
+        case "stop":
+
+            cmdPrint(`
+╔══════════════════════════════════════════════════╗
+║                 NEXUS OS                        ║
+╚══════════════════════════════════════════════════╝
+
+⚠ NEXUS OS jest obecnie PROTOTYPEM.
+
+System jest nadal rozwijany i ulepszany.
+
+🚀 W przyszłości NEXUS OS ma stać się
+prawdziwym systemem operacyjnym.
+
+Planowany rozwój:
+
+• własny kernel
+• prawdziwy system plików
+• terminal
+• pulpit systemowy
+• aplikacje
+• ustawienia systemowe
+• obsługa sprzętu
+
+STATUS: DEVELOPMENT
+
+NEXUS OS — projekt nadal trwa. 🚀
+`);
+
+            break;
+
+        case "clear":
+        case "cls":
+
+            cmdOutput.textContent="";
+
+            break;
+
+        case "echo":
+
+            cmdPrint(
+                parts.slice(1).join(" ")
+            );
+
+            break;
+
+        case "time":
+
+            cmdPrint(
+                new Date().toLocaleTimeString(
+                    "pl-PL"
+                )
+            );
+
+            break;
+
+        case "date":
+
+            cmdPrint(
+                new Date().toLocaleDateString(
+                    "pl-PL"
+                )
+            );
+
+            break;
+
+        case "apps":
+
+            cmdPrint(
+                Object.keys(apps).join("\n")
+            );
+
+            break;
+
+        case "about":
+
+            cmdPrint(`
+NEXUS OS
+Version 1.0
+Browser-based operating system
+Developed in HTML / CSS / JavaScript
+`);
+
+            break;
+
+        case "ver":
+
+            cmdPrint(
+                "NEXUS OS [Version 1.0]"
+            );
+
+            break;
+
+        case "whoami":
+
+            cmdPrint(
+                "nexus-user"
+            );
+
+            break;
+
+        case "pwd":
+
+            cmdPrint(
+                "C:\\NEXUS"
+            );
+
+            break;
+
+        case "dir":
+
+            cmdPrint(`
+Desktop
+Apps
+Documents
+Downloads
+Games
+System
+`);
+
+            break;
+
+        case "calc":
+
+            try{
+
+                const expression=
+                    parts
+                    .slice(1)
+                    .join("");
+
+                const safe=
+                    expression.replace(
+                        /[^0-9+\-*/().]/g,
+                        ""
+                    );
+
+                const result=
+                    Function(
+                        `"use strict";return (${safe})`
+                    )();
+
+                cmdPrint(
+                    String(result)
+                );
+
+            }catch{
+
+                cmdPrint(
+                    "Błąd kalkulatora."
+                );
+            }
+
+            break;
+
+        case "say":
+
+            cmdPrint(
+                parts.slice(1).join(" ")
+            );
+
+            break;
+
+        case "weather":{
+
+            const city=
+                parts.slice(1).join(" ").trim();
+
+            openApp("weather");
+
+            if(city){
+
+                weatherCityInput.value=city;
+
+                loadWeather(city);
+
+            }else{
+
+                loadWeather("wroclaw");
+            }
+
+            break;
+        }
+
+        case "open":{
+
+            const commandApps={
+
+                paint:"paint",
+                notepad:"notepad",
+                clock:"clockWindow",
+                minecraft:"minecraft",
+                cmd:"cmd",
+                browser:"browser",
+                calculator:"calculator",
+                files:"fileManager",
+                gallery:"gallery",
+                music:"music",
+                settings:"settings",
+                ai:"nexusAI",
+                monitor:"systemMonitor",
+                security:"securityCenter",
+                games:"gameCenter",
+                effects:"effects",
+                maps:"nexusMaps",
+                weather:"weather"
+            };
+
+            const appName=
+                parts[1]?.toLowerCase();
+
+            if(commandApps[appName]){
+
+                openApp(
+                    commandApps[appName]
+                );
+
+                cmdPrint(
+                    "Uruchamianie "+
+                    appName+
+                    "..."
+                );
+
+            }else{
+
+                cmdPrint(
+                    "Nie znaleziono aplikacji."
+                );
+            }
+
+            break;
+        }
+
+        case "browser":
+
+            openApp("browser");
+
+            break;
+
+        case "motd":
+
+            cmdPrint(
+                "Witaj w NEXUS OS 🚀"
+            );
+
+            break;
+
+        case "ping":
+
+            cmdPrint(
+                "Pinging nexus.local..."
+            );
+
+            setTimeout(
+                ()=>{
+                    cmdPrint(
+                        "Reply: 127.0.0.1 — 1ms"
+                    );
+                },
+                400
+            );
+
+            break;
+
+        case "history":
+
+            cmdPrint(
+                commandHistory.join("\n")
+            );
+
+            break;
+
+        default:
+
+            cmdPrint(
+                `'${cmd}' nie jest rozpoznawana jako komenda.`
+            );
+    }
+}
+
+/* CMD ENTER + HISTORIA */
+
+cmdInput.addEventListener(
+    "keydown",
+    event=>{
+
+        if(event.key==="Enter"){
+
+            event.preventDefault();
+
+            runCommand(
+                cmdInput.value
+            );
+
+            cmdInput.value="";
+
+        }else if(event.key==="ArrowUp"){
+
+            event.preventDefault();
+
+            if(!commandHistory.length){
+                return;
+            }
+
+            historyIndex=
+                Math.max(
+                    0,
+                    historyIndex-1
+                );
+
+            cmdInput.value=
+                commandHistory[
+                    historyIndex
+                ];
+
+        }else if(event.key==="ArrowDown"){
+
+            event.preventDefault();
+
+            if(!commandHistory.length){
+                return;
+            }
+
+            historyIndex=
+                Math.min(
+                    commandHistory.length,
+                    historyIndex+1
+                );
+
+            cmdInput.value=
+                historyIndex<
+                commandHistory.length
+                    ? commandHistory[
+                        historyIndex
+                    ]
+                    : "";
+        }
+    }
+);
+
+/* Kliknięcie w CMD automatycznie ustawia kursor */
+
+document.getElementById("cmd")
+.addEventListener(
+    "click",
+    event=>{
+
+        if(
+            event.target===cmdInput ||
+            event.target.classList.contains("closeButton")
+        ){
+            return;
+        }
+
+        cmdInput.focus();
+    }
+);
+
+/* =========================================================
+   BROWSER
+========================================================= */
+
+const browserFrame=
+    document.getElementById("browserFrame");
+
+const browserHome=
+    document.getElementById("browserHome");
+
+const browserAddress=
+    document.getElementById("browserAddress");
+
+const browserHomeInput=
+    document.getElementById("browserHomeInput");
+
+const blockedSites=[
+    "google.com",
+    "google.pl",
+    "youtube.com",
+    "youtu.be",
+    "facebook.com",
+    "instagram.com",
+    "x.com",
+    "twitter.com",
+    "tiktok.com",
+    "reddit.com",
+    "discord.com"
+];
+
+let browserHistory=[];
+let browserIndex=-1;
+
+function normalizeBrowserUrl(value){
+
+    let url=value.trim();
+
+    if(!url){
+        return "";
+    }
+
+    if(
+        !url.includes(".") &&
+        !url.startsWith("http")
+    ){
+
+        return (
+            "https://www.google.com/search?q="+
+            encodeURIComponent(url)
+        );
+    }
+
+    if(
+        !url.startsWith("http://") &&
+        !url.startsWith("https://")
+    ){
+
+        url="https://"+url;
+    }
+
+    return url;
+}
+
+function isBlockedSite(url){
+
+    try{
+
+        const host=
+            new URL(url)
+            .hostname
+            .toLowerCase();
+
+        return blockedSites.some(
+            site=>
+                host===site ||
+                host.endsWith("."+site)
+        );
+
+    }catch{
+
+        return false;
+    }
+}
+
+function navigateBrowser(value){
+
+    const url=
+        normalizeBrowserUrl(value);
+
+    if(!url){
+        return;
+    }
+
+    browserAddress.value=url;
+
+    if(isBlockedSite(url)){
+
+        window.open(
+            url,
+            "_blank"
+        );
+
+        return;
+    }
+
+    browserHome.style.display="none";
+    browserFrame.style.display="block";
+
+    browserFrame.src=url;
+
+    browserHistory=
+        browserHistory.slice(
+            0,
+            browserIndex+1
+        );
+
+    browserHistory.push(url);
+
+    browserIndex=
+        browserHistory.length-1;
+}
+
+document.getElementById("browserGo")
+.addEventListener(
+    "click",
+    ()=>{
+        navigateBrowser(
+            browserAddress.value
+        );
+    }
+);
+
+browserAddress.addEventListener(
+    "keydown",
+    event=>{
+        if(event.key==="Enter"){
+            navigateBrowser(
+                browserAddress.value
+            );
+        }
+    }
+);
+
+document.getElementById("browserHomeButton")
+.addEventListener(
+    "click",
+    ()=>{
+        browserFrame.style.display="none";
+        browserHome.style.display="flex";
+    }
+);
+
+document.getElementById("browserSearchButton")
+.addEventListener(
+    "click",
+    ()=>{
+        navigateBrowser(
+            browserHomeInput.value
+        );
+    }
+);
+
+browserHomeInput.addEventListener(
+    "keydown",
+    event=>{
+        if(event.key==="Enter"){
+            navigateBrowser(
+                browserHomeInput.value
+            );
+        }
+    }
+);
+
+document.getElementById("browserBack")
+.addEventListener(
+    "click",
+    ()=>{
+        if(browserIndex>0){
+
+            browserIndex--;
+
+            const url=
+                browserHistory[
+                    browserIndex
+                ];
+
+            browserAddress.value=url;
+            browserFrame.src=url;
+        }
+    }
+);
+
+document.getElementById("browserForward")
+.addEventListener(
+    "click",
+    ()=>{
+        if(
+            browserIndex<
+            browserHistory.length-1
+        ){
+
+            browserIndex++;
+
+            const url=
+                browserHistory[
+                    browserIndex
+                ];
+
+            browserAddress.value=url;
+            browserFrame.src=url;
+        }
+    }
+);
+
+document.getElementById("browserReload")
+.addEventListener(
+    "click",
+    ()=>{
+        if(browserFrame.src){
+            browserFrame.src=
+                browserFrame.src;
+        }
+    }
+);
+
+/* =========================================================
+   START SEARCH
+========================================================= */
+
+document.getElementById("startSearch")
+.addEventListener(
+    "input",
+    ()=>{
+        const query=
+            document.getElementById("startSearch")
+            .value
+            .toLowerCase()
+            .trim();
+
+        document
+        .querySelectorAll(".startApps button")
+        .forEach(button=>{
+            button.style.display=
+                button.textContent
+                .toLowerCase()
+                .includes(query)
+                    ? "block"
+                    : "none";
+        });
+    }
+);
+
+/* =========================================================
+   WYŁĄCZANIE
+========================================================= */
+
+document.getElementById("shutdownVisual")
+.addEventListener(
+    "click",
+    ()=>{
+        alert(
+            "⏻ NEXUS OS\n\n"+
+            "To jest demonstracyjny przycisk wyłączania."
+        );
+    }
+);
+
+/* =========================================================
+   START NEXUS
+========================================================= */
+
+resizePaint();
+resizeMinecraftCanvas();
+resizeMonitor();
+resizeMap();
+resizeEffectsCanvas();
+
+drawMap();
+mcLoop();
+
+console.log(
+    "NEXUS OS uruchomiony 🚀"
+);
+
+</script>
+
+</body>
+</html>
+```

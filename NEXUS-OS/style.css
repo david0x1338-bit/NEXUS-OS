@@ -1,0 +1,683 @@
+```css
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #18294a;
+}
+
+
+/* =========================
+   PULPIT
+========================= */
+
+#desktop {
+    position: fixed;
+    inset: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #18294a,
+            #315d8f
+        );
+}
+
+
+/* =========================
+   IKONY
+========================= */
+
+.desktop-icon {
+    width: 90px;
+
+    margin: 18px;
+    padding: 8px;
+
+    color: white;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    user-select: none;
+
+    border-radius: 8px;
+}
+
+.desktop-icon:hover {
+    background: rgba(255,255,255,0.14);
+}
+
+.desktop-icon .icon {
+    font-size: 42px;
+    margin-bottom: 5px;
+}
+
+.desktop-icon span {
+    font-size: 14px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
+
+
+/* =========================
+   TASKBAR
+========================= */
+
+#taskbar {
+    position: fixed;
+
+    left: 0;
+    bottom: 0;
+
+    width: 100%;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 10px;
+
+    background: rgba(20,20,20,0.96);
+
+    z-index: 1000;
+}
+
+#startButton {
+    width: 46px;
+    height: 42px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: white;
+    color: black;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+#startButton:hover {
+    background: #ddd;
+}
+
+#taskbarClock {
+    margin-left: auto;
+    margin-right: 12px;
+
+    color: white;
+    font-size: 15px;
+}
+
+
+/* =========================
+   START MENU
+========================= */
+
+#startMenu {
+    display: none;
+
+    position: fixed;
+
+    left: 10px;
+    bottom: 68px;
+
+    width: 280px;
+
+    padding: 15px;
+
+    background: rgba(28,28,28,0.98);
+
+    border: 1px solid #444;
+    border-radius: 12px;
+
+    box-shadow:
+        0 15px 45px
+        rgba(0,0,0,0.5);
+
+    z-index: 3000;
+}
+
+#startMenu h2 {
+    margin: 2px 0 15px;
+
+    color: white;
+    font-size: 20px;
+}
+
+#startMenu button {
+    width: 100%;
+
+    margin: 5px 0;
+    padding: 11px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: #333;
+    color: white;
+
+    text-align: left;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+#startMenu button:hover {
+    background: #4a4a4a;
+}
+
+#startMenu hr {
+    border: none;
+    border-top: 1px solid #555;
+    margin: 12px 0;
+}
+
+
+/* =========================
+   WSPÓLNE OKNA
+========================= */
+
+.appWindow,
+.app {
+    display: none;
+
+    position: fixed;
+    inset: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    flex-direction: column;
+
+    z-index: 5000;
+
+    pointer-events: auto;
+}
+
+
+/* =========================
+   BELKI
+========================= */
+
+.appHeader {
+    width: 100%;
+    height: 50px;
+    min-height: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 15px;
+
+    background: #202020;
+    color: white;
+
+    font-weight: bold;
+
+    position: relative;
+
+    z-index: 10;
+
+    pointer-events: auto;
+}
+
+.closeButton {
+    width: 40px;
+    height: 32px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #e53935;
+    color: white;
+
+    font-size: 16px;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+}
+
+.closeButton:hover {
+    background: #ff5555;
+}
+
+
+/* =========================
+   PAINT
+========================= */
+
+#paint {
+    background: #eee;
+}
+
+#paintToolbar {
+    height: 60px;
+    min-height: 60px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 8px 15px;
+
+    background: #d7d7d7;
+
+    border-bottom: 1px solid #aaa;
+
+    position: relative;
+    z-index: 5;
+}
+
+#colorPicker {
+    width: 50px;
+    height: 38px;
+
+    cursor: pointer;
+}
+
+#brushSize {
+    width: 180px;
+
+    cursor: pointer;
+}
+
+#brushSizeValue {
+    min-width: 45px;
+
+    color: #222;
+}
+
+#clearPaint {
+    padding: 10px 15px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: white;
+
+    cursor: pointer;
+}
+
+#clearPaint:hover {
+    background: #eee;
+}
+
+#paintCanvas {
+    width: 100%;
+    height: calc(100vh - 110px);
+
+    display: block;
+
+    background: white;
+
+    cursor: crosshair;
+
+    touch-action: none;
+}
+
+
+/* =========================
+   NOTATNIK
+========================= */
+
+#notepad {
+    background: #f3f3f3;
+}
+
+#notepadToolbar {
+    height: 58px;
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 8px 12px;
+
+    background: #d7d7d7;
+
+    border-bottom: 1px solid #aaa;
+}
+
+#notepadToolbar button {
+    padding: 9px 14px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: white;
+
+    cursor: pointer;
+}
+
+#notepadToolbar button:hover {
+    background: #eee;
+}
+
+#notepadToolbar span {
+    margin-left: 8px;
+    color: #222;
+}
+
+#fontSize {
+    width: 65px;
+
+    padding: 7px;
+
+    border: 1px solid #999;
+    border-radius: 6px;
+}
+
+#notepadText {
+    flex: 1;
+
+    width: 100%;
+
+    resize: none;
+
+    border: none;
+    outline: none;
+
+    padding: 20px;
+
+    background: white;
+    color: #111;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+#fileInput {
+    display: none;
+}
+
+
+/* =========================
+   ZEGAR
+========================= */
+
+#clockWindow {
+    background:
+        linear-gradient(
+            135deg,
+            #101827,
+            #29486b
+        );
+
+    color: white;
+}
+
+#clockHeader {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+}
+
+#clockContent {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+#bigClock {
+    font-size: clamp(70px, 12vw, 180px);
+
+    font-weight: bold;
+
+    letter-spacing: 6px;
+
+    line-height: 1;
+}
+
+#clockDate {
+    margin-top: 30px;
+
+    font-size: clamp(24px, 4vw, 48px);
+
+    opacity: 0.85;
+}
+
+
+/* =====================================================
+   NEXUS CMD
+===================================================== */
+
+#cmd {
+    display: none;
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    background: #050505;
+
+    color: #e8e8e8;
+
+    flex-direction: column;
+
+    z-index: 99999;
+
+    pointer-events: auto;
+
+    user-select: text;
+}
+
+
+/* =========================
+   CMD BODY
+========================= */
+
+.cmdBody {
+    flex: 1;
+
+    width: 100%;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 15px;
+
+    background: #050505;
+
+    overflow: hidden;
+
+    pointer-events: auto;
+}
+
+
+/* =========================
+   CMD OUTPUT
+========================= */
+
+#cmdOutput {
+    flex: 1;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    padding-bottom: 10px;
+
+    color: #e8e8e8;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 16px;
+
+    line-height: 1.5;
+
+    white-space: normal;
+
+    user-select: text;
+
+    pointer-events: auto;
+}
+
+
+/* =========================
+   CMD INPUT LINE
+========================= */
+
+.cmdInputLine {
+    width: 100%;
+
+    min-height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    margin-top: 5px;
+
+    color: #00ff66;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 16px;
+
+    background: #050505;
+
+    position: relative;
+
+    z-index: 20;
+
+    pointer-events: auto;
+}
+
+.cmdInputLine span {
+    flex-shrink: 0;
+
+    color: #00ff66;
+
+    user-select: none;
+
+    pointer-events: none;
+}
+
+
+/* =========================
+   CMD INPUT
+========================= */
+
+#cmdInput {
+    flex: 1;
+
+    width: 100%;
+
+    min-width: 0;
+
+    height: 34px;
+
+    padding: 4px 8px;
+
+    margin: 0;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    color: #ffffff;
+
+    caret-color: #00ff66;
+
+    font-family:
+        Consolas,
+        "Courier New",
+        monospace;
+
+    font-size: 16px;
+
+    user-select: text;
+
+    pointer-events: auto;
+
+    cursor: text;
+
+    z-index: 30;
+}
+
+#cmdInput:focus {
+    outline: none;
+
+    border: none;
+
+    box-shadow: none;
+}
+
+#cmdInput::selection {
+    background: #245c3c;
+}
+
+
+/* =========================
+   CMD SCROLLBAR
+========================= */
+
+#cmdOutput::-webkit-scrollbar {
+    width: 10px;
+}
+
+#cmdOutput::-webkit-scrollbar-track {
+    background: #090909;
+}
+
+#cmdOutput::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 5px;
+}
+
+#cmdOutput::-webkit-scrollbar-thumb:hover {
+    background: #444;
+}
+```
